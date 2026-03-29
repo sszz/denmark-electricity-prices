@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elpris i Danmark - Live Dashboard | DK1 & DK2 priser</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Følg elpriser i Danmark i realtid. Live dashboard for DK1 og DK2 regioner med aktuelle, minimale og maksimale priser i DKK og EUR. Interaktiv besparelsessimulator for husholdningsapparater.">
+    <meta name="keywords" content="elpris Danmark, electricity price Denmark, DK1, DK2, el-pris Danmark, strømpris, energi, dashboard, live prices, Energi Data Service, elbesparelse, forbrugssimulator">
+    <meta name="author" content="Electricity Dashboard DK">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Danish">
+    <link rel="canonical" href=""><!-- INDSÆT DIN URL HER -->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Elpris i Danmark - Live Dashboard">
+    <meta property="og:description" content="Følg elpriser i Danmark i realtid. DK1 og DK2 regioner, interaktiv besparelsessimulator for husholdningsapparater.">
+    <meta property="og:image" content=""><!-- INDSÆT URL TIL SCREENSHOT BILLEDE (1200x630px) -->
+    <meta property="og:url" content=""><!-- INDSÆT DIN URL HER -->
+    <meta property="og:locale" content="da_DK">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Elpris i Danmark - Live Dashboard">
+    <meta name="twitter:description" content="Live elpriser DK1/DK2, besparelsessimulator for husholdningsapparater.">
+    <meta name="twitter:image" content=""><!-- INDSÆT URL TIL SCREENSHOT BILLEDE -->
+
+    <!-- Structured Data / JSON-LD for Google Rich Results -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Elpris i Danmark - Live Dashboard",
+        "description": "Følg elpriser i Danmark i realtid for DK1 og DK2 regioner. Interaktiv besparelsessimulator for husholdningsapparater.",
+        "url": "",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "DKK"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Electricity Dashboard DK"
+        }
+    }
+    </script>
+
+    <!-- Favicon placeholder -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --bg-secondary: rgba(30, 41, 59, 0.8);
+            --bg-tertiary: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --border-color: #334155;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --table-header-bg: #0f172a;
+            --table-row-hover: rgba(56, 189, 248, 0.05);
+            --table-current-row: rgba(56, 189, 248, 0.1);
+            --timeline-bg: #0f172a;
+            --readout-bg: #0f172a;
+            --footer-text: #475569;
+            --toggle-bg: rgba(30, 41, 59, 0.8);
+            --toggle-border: #334155;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --bg-tertiary: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --border-color: #cbd5e1;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --table-header-bg: #e2e8f0;
+            --table-row-hover: rgba(59, 130, 246, 0.05);
+            --table-current-row: rgba(59, 130, 246, 0.1);
+            --timeline-bg: #e2e8f0;
+            --readout-bg: #f1f5f9;
+            --footer-text: #94a3b8;
+            --toggle-bg: rgba(255, 255, 255, 0.9);
+            --toggle-border: #cbd5e1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .header { text-align: center; margin-bottom: 32px; }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .status-bar {
+            display: flex; justify-content: center; align-items: center;
+            gap: 12px; margin-bottom: 24px; font-size: 0.85rem; color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #22c55e; animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .region-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+
+        .region-tab {
+            padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border-color);
+            background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+        }
+
+        .region-tab:hover { border-color: #60a5fa; color: var(--text-primary); }
+
+        .region-tab.active {
+            background: #3b82f6; border-color: #3b82f6; color: white; font-weight: 600;
+        }
+
+        .dk-map-section {
+            max-width: 1000px; margin: 0 auto 24px; padding: 16px;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+        }
+        .dk-map-region { cursor: pointer; transition: all 0.3s ease; }
+        .dk-map-region:hover { filter: brightness(1.25); transform-origin: center; }
+        .dk1-region.map-active { filter: brightness(1.1) drop-shadow(0 0 10px rgba(59,130,246,0.6)); }
+        .dk2-region.map-active { filter: brightness(1.1) drop-shadow(0 0 10px rgba(220,38,38,0.6)); }
+        .dk1-region.map-dim { opacity: 0.4; }
+        .dk2-region.map-dim { opacity: 0.4; }
+
+        .cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px; max-width: 1000px; margin: 0 auto 32px;
+        }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px; text-align: center; backdrop-filter: blur(8px);
+        }
+
+        .card-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .card-value { font-size: 2rem; font-weight: 700; }
+        .card-unit { font-size: 0.85rem; color: var(--text-tertiary); margin-top: 4px; }
+
+        .price-current { color: #38bdf8; }
+        .price-low { color: #22c55e; }
+        .price-high { color: #f43f5e; }
+        .price-avg { color: #a78bfa; }
+
+        .chart-container {
+            max-width: 1000px; margin: 0 auto 32px;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 24px;
+        }
+
+        .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+
+        .table-container {
+            max-width: 1000px; margin: 0 auto;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden;
+        }
+
+        .table-title { font-size: 1.1rem; font-weight: 600; padding: 20px 24px 12px; color: var(--text-primary); }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: var(--table-header-bg); padding: 12px 16px; text-align: left;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text-secondary); font-weight: 600;
+        }
+
+        td { padding: 12px 16px; border-top: 1px solid var(--border-color); font-size: 0.9rem; }
+        tr:hover { background: var(--table-row-hover); }
+
+        tr.current-hour { background: var(--table-current-row); border-left: 3px solid #38bdf8; }
+
+        .price-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        .badge-low { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .badge-mid { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+        .badge-high { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+
+        .error-message { text-align: center; padding: 40px; color: #f87171; font-size: 1rem; }
+        .loading { text-align: center; padding: 60px; color: var(--text-secondary); }
+
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid var(--border-color);
+            border-top-color: #38bdf8; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer { text-align: center; margin-top: 32px; color: var(--footer-text); font-size: 0.8rem; }
+
+        .currency-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+
+        .currency-btn {
+            padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
+        }
+
+        .currency-btn.active { background: #475569; color: white; border-color: #475569; }
+
+        .top-toggles {
+            position: fixed; top: 16px; right: 16px;
+            display: flex; gap: 8px; z-index: 9998;
+        }
+
+        .theme-toggle, .lang-toggle {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--toggle-bg); border: 1px solid var(--toggle-border);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: all 0.3s;
+        }
+
+        .lang-toggle { font-size: 0.7rem; font-weight: 800; color: var(--text-primary); letter-spacing: 0.5px; }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        [data-theme="light"] .theme-toggle, [data-theme="light"] .lang-toggle {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #cbd5e1;
+        }
+
+        .appliance-section {
+            max-width: 1000px; margin: 32px auto 0;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 24px;
+        }
+
+        .appliance-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+
+        .appliance-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px; margin-bottom: 20px;
+        }
+
+        .appliance-card {
+            background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: 10px;
+            padding: 14px; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+
+        .appliance-card:hover { border-color: #60a5fa; }
+
+        .appliance-card.selected { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+
+        .appliance-icon { font-size: 1.6rem; margin-bottom: 6px; }
+        .appliance-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+        .appliance-watts { font-size: 0.75rem; color: var(--text-tertiary); }
+
+        .duration-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .duration-selector label { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .duration-selector select, .duration-selector input {
+            background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;
+        }
+
+        .sav-green { color: #22c55e; }
+        .sav-red { color: #f43f5e; }
+        .sav-blue { color: #38bdf8; }
+        .sav-yellow { color: #facc15; }
+
+        .sim-timeline-wrap { margin-bottom: 20px; }
+
+        .sim-timeline {
+            position: relative; height: 120px; background: var(--timeline-bg);
+            border-radius: 8px; overflow: visible; cursor: grab; user-select: none;
+        }
+
+        .sim-timeline:active { cursor: grabbing; }
+        .sim-timeline canvas { width: 100%; height: 100%; display: block; }
+
+        .sim-handle {
+            position: absolute; top: 0; height: 100%;
+            background: rgba(56, 189, 248, 0.2); border: 2px solid #38bdf8;
+            border-radius: 6px; pointer-events: none;
+        }
+
+        .sim-handle-label {
+            position: absolute; top: -32px; left: 50%; transform: translateX(-50%);
+            background: #38bdf8; color: var(--bg-tertiary); font-size: 0.75rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 4px; white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .sim-tooltip {
+            position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 10px 14px; min-width: 200px;
+            pointer-events: none; white-space: nowrap; z-index: 10;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            display: none;
+        }
+
+        .sim-tooltip.visible { display: block; }
+
+        .sim-tooltip::after {
+            content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+            border-left: 6px solid transparent; border-right: 6px solid transparent;
+            border-top: 6px solid var(--border-color);
+        }
+
+        .sim-tooltip-title {
+            font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+
+        .sim-tooltip-time { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+
+        .sim-tooltip-row {
+            display: flex; justify-content: space-between; gap: 12px;
+            font-size: 0.75rem; margin-bottom: 2px;
+        }
+
+        .sim-tooltip-label { color: var(--text-secondary); }
+        .sim-tooltip-val { font-weight: 600; }
+
+        .sim-hours {
+            display: flex; justify-content: space-between; padding: 4px 0;
+            font-size: 0.7rem; color: var(--text-tertiary);
+        }
+
+        .sim-readout { background: var(--readout-bg); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+
+        .sim-readout-row {
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; margin-bottom: 16px;
+        }
+
+        .sim-readout-cell { text-align: center; min-width: 140px; }
+
+        .sim-vs { font-size: 1.2rem; font-weight: 800; color: #475569; min-width: auto !important; }
+
+        .sim-readout-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-secondary); margin-bottom: 4px;
+        }
+
+        .sim-readout-time { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+        .sim-readout-cost { font-size: 1.5rem; font-weight: 800; }
+
+        .sim-diff-bar { height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+
+        .sim-diff-fill { height: 100%; border-radius: 4px; transition: width 0.2s, background 0.2s; width: 0%; }
+
+        .sim-diff-text { text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+
+        .sim-table { width: 100%; border-collapse: collapse; background: var(--bg-tertiary); border-radius: 8px; overflow: hidden; }
+
+        .sim-table th {
+            background: var(--table-header-bg); padding: 10px 14px; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); text-align: center;
+        }
+
+        .sim-table th:first-child { text-align: left; }
+
+        .sim-table td { padding: 10px 14px; border-top: 1px solid var(--border-color); font-size: 0.85rem; text-align: center; }
+        .sim-table td:first-child { text-align: left; color: var(--text-secondary); font-size: 0.8rem; }
+
+        .sim-table .diff-positive { color: #f43f5e; }
+        .sim-table .diff-negative { color: #22c55e; }
+        .sim-table .diff-zero { color: var(--text-secondary); }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .header h1 { font-size: 1.5rem; }
+            .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .card-value { font-size: 1.4rem; }
+            .appliance-grid { grid-template-columns: repeat(2, 1fr); }
+            .dk-map-section { padding: 10px; }
+            .dk-map-section svg { max-width: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-toggles">
+    <button class="lang-toggle" id="langToggle" onclick="toggleLang()" title="Skift sprog / Promijeni jezik">DK</button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme"><span id="themeIcon">☀️</span></button>
+</div>
+
+<div class="header">
+    <h1>Elpris i Danmark</h1>
+    <p class="subtitle">Spotpriser fra Energi Data Service (energidataservice.dk)</p>
+</div>
+
+<div class="status-bar">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Forbinder... </span>
+    <span>|</span>
+    <span id="lastUpdate">--</span>
+</div>
+
+<div class="region-tabs">
+    <button class="region-tab active" onclick="setRegion('DK1')">DK1 - Vestdanmark</button>
+    <button class="region-tab" onclick="setRegion('DK2')">DK2 - Østdanmark</button>
+</div>
+
+<!-- Interactive Denmark Map -->
+<div class="dk-map-section">
+    <svg id="dkMapSvg" viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" style="max-width:460px;width:100%;margin:0 auto;display:block">
+        <defs>
+            <filter id="glow1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Sea background -->
+        <rect x="0" y="0" width="500" height="420" rx="8" fill="var(--bg-tertiary)" opacity="0.5"/>
+        <!-- DK1: Jylland (Jutland) - detailed coastline -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M120,6 L126,4 L134,2 L142,1 L150,3 L155,8 L152,14 L148,10 L143,14 L149,20
+            L155,18 L160,22 L157,28 L153,32 L158,36 L163,34 L168,30 L172,35 L168,42 L164,46
+            L170,44 L176,40 L180,36 L184,32 L180,40 L176,48 L173,54 L178,50 L183,46 L186,42
+            L188,48 L185,56 L181,62 L178,68 L182,66 L186,60 L189,56 L190,62 L188,70 L185,78
+            L181,84 L178,90 L183,88 L186,82 L188,78 L189,84 L187,92 L184,98 L180,104
+            L176,110 L178,116 L180,122 L178,128 L174,134 L170,140 L175,144 L179,148
+            L176,154 L172,160 L174,166 L178,170 L176,176 L172,182 L168,188 L164,194
+            L168,198 L172,194 L176,190 L174,196 L170,202 L166,208 L162,214 L158,220
+            L154,226 L150,232 L147,238 L152,236 L156,232 L158,238 L155,244 L150,250
+            L145,256 L140,262 L136,268 L132,274 L128,278 L122,282 L116,286 L110,290
+            L106,296 L110,300 L116,298 L120,294 L126,290 L130,286 L134,290 L130,296
+            L124,302 L118,306 L112,310 L108,316 L116,318 L124,316 L130,312 L136,308
+            L140,304 L146,300 L152,296 L156,300 L152,306 L146,310 L142,316 L148,320
+            L154,318 L158,314 L162,318 L160,324 L155,330 L148,334 L142,336 L136,332
+            L128,328 L122,324 L116,328 L112,334 L108,340 L102,344 L96,348 L90,350
+            L84,348 L80,342 L76,336 L72,330 L68,324 L64,318 L60,312 L58,306 L56,298
+            L58,290 L62,284 L66,278 L64,272 L60,266 L58,258 L60,250 L64,244 L68,238
+            L66,232 L62,226 L58,220 L56,214 L60,206 L64,200 L68,194 L70,188 L66,182
+            L62,176 L58,170 L56,162 L60,154 L64,148 L68,142 L72,136 L70,128 L66,122
+            L62,116 L58,108 L56,100 L60,92 L64,86 L68,80 L72,74 L76,68 L74,60
+            L70,54 L66,48 L64,40 L68,32 L72,26 L78,20 L84,16 L92,12 L100,8 L110,6 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK1: Nordjylland (north of Limfjorden) -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M100,4 L108,2 L118,6 L110,6 L100,8 L92,12 L84,16 L78,20 L72,26
+            L68,32 L64,40 L66,34 L70,28 L76,22 L82,16 L88,10 L96,6 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.8" stroke-linejoin="round" opacity="0"/>
+        <!-- DK1: Fyn (Funen) -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M172,305 L178,300 L186,298 L194,300 L202,304 L208,310 L212,318
+            L214,326 L212,334 L208,340 L202,344 L194,346 L186,344 L178,340
+            L174,334 L170,326 L168,318 L170,310 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK1: Als -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M130,332 L136,328 L142,330 L146,336 L148,344 L146,352 L140,356 L134,354 L130,348 L128,340 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK1: Langeland -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M198,350 L202,348 L205,354 L206,364 L204,374 L200,380 L196,376 L194,366 L195,356 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK1: Ærø -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M160,356 L170,352 L180,354 L186,358 L182,364 L172,366 L162,362 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+
+        <!-- Storebælt divider -->
+        <line x1="218" y1="290" x2="222" y2="370" stroke="#475569" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+        <!-- DK2: Sjælland (Zealand) - detailed -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M254,260 L262,254 L272,250 L282,248 L292,250 L302,254 L310,260
+            L316,268 L320,276 L324,284 L328,276 L334,270 L340,268 L344,274
+            L342,282 L338,290 L342,298 L346,306 L344,314 L340,322 L334,328
+            L328,334 L320,338 L312,342 L304,344 L296,346 L288,344 L280,340
+            L272,334 L266,326 L260,318 L256,310 L252,300 L250,290 L248,280
+            L250,270 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Amager (Copenhagen area) -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M332,270 L338,268 L342,274 L344,284 L342,294 L338,300 L334,296 L332,286 L330,278 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK2: Lolland -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M222,372 L236,366 L252,364 L270,366 L288,370 L300,376 L296,384
+            L284,390 L268,394 L250,396 L234,392 L222,384 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Falster -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M306,362 L314,358 L320,364 L322,376 L320,388 L316,396 L310,400
+            L304,394 L302,382 L304,370 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Møn -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M338,348 L346,344 L354,348 L356,356 L350,362 L342,360 L336,354 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK2: Bornholm -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M440,258 L450,254 L460,258 L466,268 L464,280 L458,288 L448,292
+            L438,288 L434,278 L436,268 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+
+        <!-- DK1 Label -->
+        <text x="120" y="195" fill="white" font-size="20" font-weight="800" text-anchor="middle" style="pointer-events:none;text-shadow:0 2px 6px rgba(0,0,0,0.7);letter-spacing:2px">DK1</text>
+        <text x="120" y="212" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="500" text-anchor="middle" style="pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.5)">VESTDANMARK</text>
+        <!-- DK2 Label -->
+        <text x="296" y="302" fill="white" font-size="20" font-weight="800" text-anchor="middle" style="pointer-events:none;text-shadow:0 2px 6px rgba(0,0,0,0.7);letter-spacing:2px">DK2</text>
+        <text x="296" y="319" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="500" text-anchor="middle" style="pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.5)">ØSTDANMARK</text>
+        <!-- Bornholm label -->
+        <text x="450" y="276" fill="rgba(255,255,255,0.6)" font-size="8" text-anchor="middle" style="pointer-events:none">Bornholm</text>
+
+        <!-- Legend -->
+        <rect x="20" y="400" width="14" height="14" rx="3" fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.5"/>
+        <text x="40" y="412" font-size="11" style="fill:var(--text-secondary)">Vestdanmark (DK1) - Jylland &amp; Fyn</text>
+        <rect x="260" y="400" width="14" height="14" rx="3" fill="#dc2626" stroke="#991b1b" stroke-width="0.5"/>
+        <text x="280" y="412" font-size="11" style="fill:var(--text-secondary)">Østdanmark (DK2) - Sjælland &amp; øerne</text>
+    </svg>
+</div>
+
+<div class="currency-toggle">
+    <button class="currency-btn active" onclick="setCurrency('DKK')">DKK</button>
+    <button class="currency-btn" onclick="setCurrency('EUR')">EUR</button>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <div class="card-label">Aktuel pris</div>
+        <div class="card-value price-current" id="currentPrice">--</div>
+        <div class="card-unit" id="currentUnit">DKK/kWh</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Laveste i dag</div>
+        <div class="card-value price-low" id="lowPrice">--</div>
+        <div class="card-unit" id="lowUnit">DKK/kWh</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Højeste i dag</div>
+        <div class="card-value price-high" id="highPrice">--</div>
+        <div class="card-unit" id="highUnit">DKK/kWh</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Gennemsnit i dag</div>
+        <div class="card-value price-avg" id="avgPrice">--</div>
+        <div class="card-unit" id="avgUnit">DKK/kWh</div>
+    </div>
+</div>
+
+<div class="chart-container">
+    <div class="chart-title">Timepriser i dag</div>
+    <div style="position:relative;height:300px"><canvas id="priceChart"></canvas></div>
+</div>
+
+<div class="table-container">
+    <div class="table-title">Timeoversigt over priser</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Pris (DKK/kWh)</th>
+                <th>Pris (EUR/kWh)</th>
+                <th>Niveau</th>
+            </tr>
+        </thead>
+        <tbody id="priceTable">
+            <tr><td colspan="4" class="loading"><div class="spinner"></div>Indlæser data...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="appliance-section">
+    <div class="appliance-title">Forbrugssimulator — træk rektanglet og se prisforskellen</div>
+
+    <div class="appliance-grid" id="applianceGrid">
+        <div class="appliance-card" data-kwh="2.0" data-hours="2" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F9FA;</div>
+            <div class="appliance-name">Vaskemaskine</div>
+            <div class="appliance-watts">~2 kWh / 2h</div>
+        </div>
+        <div class="appliance-card" data-kwh="3.5" data-hours="2" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F321;</div>
+            <div class="appliance-name">Tørretumbler</div>
+            <div class="appliance-watts">~3.5 kWh / 2h</div>
+        </div>
+        <div class="appliance-card" data-kwh="2.0" data-hours="1" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F373;</div>
+            <div class="appliance-name">Ovn</div>
+            <div class="appliance-watts">~2 kWh / 1h</div>
+        </div>
+        <div class="appliance-card" data-kwh="1.8" data-hours="2" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F37D;</div>
+            <div class="appliance-name">Opvaskemaskine</div>
+            <div class="appliance-watts">~1.8 kWh / 2h</div>
+        </div>
+        <div class="appliance-card selected" data-kwh="14" data-hours="2" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F697;</div>
+            <div class="appliance-name">Elbil opladning (7kW)</div>
+            <div class="appliance-watts">~14 kWh / 2h</div>
+        </div>
+        <div class="appliance-card" data-kwh="22" data-hours="3" onclick="selectAppliance(this)">
+            <div class="appliance-icon">&#x1F699;</div>
+            <div class="appliance-name">Elbil opladning (11kW)</div>
+            <div class="appliance-watts">~22 kWh / 3h</div>
+        </div>
+    </div>
+
+    <div class="duration-selector" id="customDuration">
+        <label>Varighed:</label>
+        <select id="durationSelect" onchange="onManualParamsChange()">
+            <option value="1">1 time</option>
+            <option value="2" selected>2 timer</option>
+            <option value="3">3 timer</option>
+            <option value="4">4 timer</option>
+            <option value="5">5 timer</option>
+            <option value="6">6 timer</option>
+        </select>
+        <label>Forbrug (kWh):</label>
+        <input type="number" id="customKwh" min="0.1" step="0.1" value="14" style="width:80px" oninput="onManualParamsChange()">
+        <span id="autoCalcBadge" style="font-size:0.7rem;color:#22c55e;margin-left:6px;opacity:1;transition:opacity 0.3s">&#x2713; auto</span>
+    </div>
+
+    <!-- INTERACTIVE TIMELINE -->
+    <div id="simSection" style="display:none">
+        <div class="sim-timeline-wrap">
+            <div class="sim-timeline" id="simTimeline">
+                <canvas id="simCanvas"></canvas>
+                <div class="sim-handle" id="simHandle">
+                    <div class="sim-tooltip" id="simTooltip">
+                        <div class="sim-tooltip-title" id="simTooltipTitle">Elbil opladning (7kW)</div>
+                        <div class="sim-tooltip-time" id="simTooltipTime">00:00 - 02:00</div>
+                        <div class="sim-tooltip-row"><span class="sim-tooltip-label">Forbrug:</span><span class="sim-tooltip-val" id="simTooltipKwh">14.0 kWh</span></div>
+                        <div class="sim-tooltip-row"><span class="sim-tooltip-label">Pris/kWh:</span><span class="sim-tooltip-val" id="simTooltipPriceKwh">--</span></div>
+                        <div class="sim-tooltip-row"><span class="sim-tooltip-label">Samlet pris:</span><span class="sim-tooltip-val sav-blue" id="simTooltipCost">--</span></div>
+                        <div class="sim-tooltip-row"><span class="sim-tooltip-label">vs Optimal:</span><span class="sim-tooltip-val" id="simTooltipVsOpt">--</span></div>
+                    </div>
+                    <div class="sim-handle-label" id="simHandleLabel">00:00 - 02:00</div>
+                </div>
+            </div>
+            <div class="sim-hours" id="simHours"></div>
+        </div>
+
+        <div class="sim-readout">
+            <div class="sim-readout-row">
+                <div class="sim-readout-cell">
+                    <div class="sim-readout-label">Dit valg</div>
+                    <div class="sim-readout-time" id="simYourTime">--</div>
+                    <div class="sim-readout-cost sav-blue" id="simYourCost">--</div>
+                </div>
+                <div class="sim-readout-cell sim-vs">VS</div>
+                <div class="sim-readout-cell">
+                    <div class="sim-readout-label">Optimalt</div>
+                    <div class="sim-readout-time sav-green" id="simOptTime">--</div>
+                    <div class="sim-readout-cost sav-green" id="simOptCost">--</div>
+                </div>
+            </div>
+
+            <div class="sim-diff-bar">
+                <div class="sim-diff-fill" id="simDiffFill"></div>
+            </div>
+            <div class="sim-diff-text" id="simDiffText">Træk rektanglet for at sammenligne</div>
+        </div>
+
+        <table class="sim-table" id="simTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Dit valg</th>
+                    <th>Optimalt</th>
+                    <th>Forskel</th>
+                </tr>
+            </thead>
+            <tbody id="simTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="footer">
+    Kilde: <a href="https://www.energidataservice.dk" target="_blank" style="color:#60a5fa">Energi Data Service</a> |
+    Priserne opdateres automatisk hvert 5. minut |
+    Spotpriser er fra Nord Pool-børsen
+</div>
+
+<script>
+let currentRegion = 'DK1';
+let currentCurrency = 'DKK';
+let rawData = [];
+let hourlyData = [];
+let chart = null;
+
+function setRegion(region) {
+    currentRegion = region;
+    document.querySelectorAll('.region-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab.textContent.includes(region));
+    });
+    // Update map highlighting
+    document.querySelectorAll('.dk1-region').forEach(function(el) {
+        el.classList.toggle('map-active', region === 'DK1');
+        el.classList.toggle('map-dim', region !== 'DK1');
+    });
+    document.querySelectorAll('.dk2-region').forEach(function(el) {
+        el.classList.toggle('map-active', region === 'DK2');
+        el.classList.toggle('map-dim', region !== 'DK2');
+    });
+    fetchPrices();
+}
+
+function setCurrency(currency) {
+    currentCurrency = currency;
+    document.querySelectorAll('.currency-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.textContent === currency);
+    });
+    renderAll();
+}
+
+function parseDKTime(timeDKStr) {
+    if (!timeDKStr) return { hour: -1, minute: -1 };
+    var match = timeDKStr.match(/T(\d{2}):(\d{2})/);
+    return match ? { hour: parseInt(match[1], 10), minute: parseInt(match[2], 10) } : { hour: -1, minute: -1 };
+}
+
+function aggregateHourly(records) {
+    var hourMap = {};
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        var h = parseDKTime(r.TimeDK).hour;
+        if (h < 0) continue;
+        if (!hourMap[h]) hourMap[h] = { hour: h, dkkSum: 0, eurSum: 0, count: 0 };
+        hourMap[h].dkkSum += (r.DayAheadPriceDKK || 0);
+        hourMap[h].eurSum += (r.DayAheadPriceEUR || 0);
+        hourMap[h].count++;
+    }
+    return Object.values(hourMap)
+        .map(function(h) {
+            return { hour: h.hour, priceDKK: h.dkkSum / h.count / 1000, priceEUR: h.eurSum / h.count / 1000 };
+        })
+        .sort(function(a, b) { return a.hour - b.hour; });
+}
+
+function getHourPrice(hourRec) {
+    return currentCurrency === 'EUR' ? hourRec.priceEUR : hourRec.priceDKK;
+}
+
+function formatPrice(val) {
+    if (val === null || val === undefined || isNaN(val)) return '--';
+    return currentCurrency === 'EUR' ? val.toFixed(3) : val.toFixed(2);
+}
+
+function getPriceBadge(price, avg) {
+    if (price < avg * 0.8) return { class: 'badge-low', text: t('badgeLow') };
+    if (price > avg * 1.2) return { class: 'badge-high', text: t('badgeHigh') };
+    return { class: 'badge-mid', text: t('badgeMid') };
+}
+
+async function fetchPrices() {
+    var statusDot = document.getElementById('statusDot');
+    var statusText = document.getElementById('statusText');
+
+    try {
+        var now = new Date();
+        var dkDateStr = now.toLocaleDateString('sv-SE', { timeZone: 'Europe/Copenhagen' });
+        var dkTomorrow = new Date(now.getTime() + 86400000);
+        var dkTomorrowStr = dkTomorrow.toLocaleDateString('sv-SE', { timeZone: 'Europe/Copenhagen' });
+
+        var filter = encodeURIComponent(JSON.stringify({ PriceArea: currentRegion }));
+        var url = 'https://api.energidataservice.dk/dataset/DayAheadPrices?start=' + dkDateStr + 'T00:00&end=' + dkTomorrowStr + 'T00:00&filter=' + filter + '&sort=TimeDK%20asc';
+
+        var response = await fetch(url);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+
+        var data = await response.json();
+        rawData = data.records || [];
+        hourlyData = aggregateHourly(rawData);
+
+        statusDot.style.background = '#22c55e';
+        statusText.textContent = t('connected');
+        document.getElementById('lastUpdate').textContent = t('updated') + ': ' + new Date().toLocaleTimeString('da-DK');
+
+        renderAll();
+
+    } catch (err) {
+        console.error('Fejl:', err);
+        statusDot.style.background = '#f43f5e';
+        statusText.textContent = t('errorLoading');
+        document.getElementById('priceTable').innerHTML =
+            '<tr><td colspan="4" class="error-message">' + t('cannotLoad') + '<br><small>' + err.message + '</small></td></tr>';
+    }
+}
+
+function renderAll() {
+    if (!hourlyData.length) return;
+
+    var unit = currentCurrency + '/kWh';
+    var prices = hourlyData.map(function(h) { return getHourPrice(h); });
+    var now = new Date();
+    var dkHour = parseInt(now.toLocaleString('en-US', { timeZone: 'Europe/Copenhagen', hour: 'numeric', hour12: false }));
+
+    var currentRec = hourlyData.find(function(h) { return h.hour === dkHour; });
+    var currentVal = currentRec ? getHourPrice(currentRec) : null;
+    var minVal = Math.min.apply(null, prices);
+    var maxVal = Math.max.apply(null, prices);
+    var avgVal = prices.reduce(function(a, b) { return a + b; }, 0) / prices.length;
+
+    document.getElementById('currentPrice').textContent = formatPrice(currentVal);
+    document.getElementById('currentUnit').textContent = unit;
+    document.getElementById('lowPrice').textContent = formatPrice(minVal);
+    document.getElementById('lowUnit').textContent = unit;
+    document.getElementById('highPrice').textContent = formatPrice(maxVal);
+    document.getElementById('highUnit').textContent = unit;
+    document.getElementById('avgPrice').textContent = formatPrice(avgVal);
+    document.getElementById('avgUnit').textContent = unit;
+
+    renderChart(dkHour, avgVal);
+    renderTable(dkHour, avgVal);
+    initSimulator();
+}
+
+function renderChart(currentHour, avgVal) {
+    var ctx = document.getElementById('priceChart').getContext('2d');
+    var labels = hourlyData.map(function(h) { return String(h.hour).padStart(2, '0') + ':00'; });
+    var prices = hourlyData.map(function(h) { return getHourPrice(h); });
+
+    var colors = prices.map(function(p, i) {
+        if (hourlyData[i].hour === currentHour) return '#38bdf8';
+        if (p < avgVal * 0.8) return '#22c55e';
+        if (p > avgVal * 1.2) return '#f43f5e';
+        return '#818cf8';
+    });
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: t('price') + ' (' + currentCurrency + '/kWh)',
+                data: prices,
+                backgroundColor: colors,
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) { return formatPrice(ctx.raw) + ' ' + currentCurrency + '/kWh'; }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(51,65,85,0.3)' } },
+                y: {
+                    ticks: { color: '#94a3b8', font: { size: 11 }, callback: function(v) { return formatPrice(v); } },
+                    grid: { color: 'rgba(51,65,85,0.3)' }
+                }
+            }
+        }
+    });
+}
+
+function renderTable(currentHour, avgVal) {
+    var tbody = document.getElementById('priceTable');
+    var html = '';
+
+    for (var i = 0; i < hourlyData.length; i++) {
+        var rec = hourlyData[i];
+        var displayPrice = getHourPrice(rec);
+        var badge = getPriceBadge(displayPrice, avgVal);
+        var isCurrent = rec.hour === currentHour;
+
+        html += '<tr class="' + (isCurrent ? 'current-hour' : '') + '">' +
+            '<td>' + String(rec.hour).padStart(2, '0') + ':00 - ' + String(rec.hour + 1).padStart(2, '0') + ':00 ' + (isCurrent ? '(' + t('now') + ')' : '') + '</td>' +
+            '<td>' + rec.priceDKK.toFixed(2) + '</td>' +
+            '<td>' + rec.priceEUR.toFixed(3) + '</td>' +
+            '<td><span class="price-badge ' + badge.class + '">' + badge.text + '</span></td>' +
+            '</tr>';
+    }
+
+    if (!html) {
+        html = '<tr><td colspan="4" class="loading">' + t('noData') + '</td></tr>';
+    }
+
+    tbody.innerHTML = html;
+}
+
+// ===== INTERACTIVE SIMULATOR =====
+var selectedAppliance = null;
+var simStartHour = 0;
+var simSlots = 2;
+var simKwh = 14;
+var simOptimal = { start: 0, cost: 0 };
+var simWorst = { start: 0, cost: 0 };
+var isDragging = false;
+var dragBound = false;
+
+var isAutoCalc = true;
+
+function selectAppliance(el) {
+    document.querySelectorAll('.appliance-card').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedAppliance = el;
+
+    var kwh = parseFloat(el.dataset.kwh);
+    var hours = parseFloat(el.dataset.hours);
+    document.getElementById('customKwh').value = kwh;
+    document.getElementById('durationSelect').value = String(hours);
+
+    simKwh = kwh;
+    simSlots = Math.max(1, Math.ceil(hours));
+    isAutoCalc = true;
+    var badge = document.getElementById('autoCalcBadge');
+    if (badge) { badge.style.opacity = '1'; badge.style.color = '#22c55e'; badge.innerHTML = '&#x2713; auto'; }
+    initSimulator();
+}
+
+function onManualParamsChange() {
+    simKwh = parseFloat(document.getElementById('customKwh').value) || 2;
+    simSlots = parseInt(document.getElementById('durationSelect').value) || 2;
+    isAutoCalc = false;
+    var badge = document.getElementById('autoCalcBadge');
+    if (badge) { badge.style.opacity = '1'; badge.style.color = '#f59e0b'; badge.innerHTML = '&#x270E; manual'; }
+    initSimulator();
+}
+
+function onParamsChange() {
+    simKwh = parseFloat(document.getElementById('customKwh').value) || 2;
+    simSlots = parseInt(document.getElementById('durationSelect').value) || 2;
+    initSimulator();
+}
+
+function initSimulator() {
+    if (!hourlyData.length) return;
+
+    document.getElementById('simSection').style.display = 'block';
+
+    computeOptimalWorst();
+    drawSimCanvas();
+    renderSimHours();
+
+    // Clamp simStartHour
+    if (simStartHour > 24 - simSlots) simStartHour = 24 - simSlots;
+    if (simStartHour < 0) simStartHour = 0;
+
+    positionHandle(simStartHour);
+    updateSimReadout();
+    setupDragEvents();
+}
+
+function computeOptimalWorst() {
+    var bestCost = Infinity, bestStart = 0;
+    var worstCost = -Infinity, worstStart = 0;
+
+    for (var i = 0; i <= hourlyData.length - simSlots; i++) {
+        var cost = windowCost(hourlyData[i].hour);
+        if (cost < bestCost) { bestCost = cost; bestStart = hourlyData[i].hour; }
+        if (cost > worstCost) { worstCost = cost; worstStart = hourlyData[i].hour; }
+    }
+
+    simOptimal = { start: bestStart, cost: bestCost };
+    simWorst = { start: worstStart, cost: worstCost };
+}
+
+function windowCost(startHour) {
+    var totalPrice = 0;
+    var count = 0;
+    for (var j = 0; j < simSlots; j++) {
+        var rec = hourlyData.find(function(h) { return h.hour === startHour + j; });
+        if (rec) { totalPrice += getHourPrice(rec); count++; }
+    }
+    if (count === 0) return 0;
+    return totalPrice * simKwh / count;
+}
+
+function drawSimCanvas() {
+    var canvas = document.getElementById('simCanvas');
+    var parent = canvas.parentElement;
+    var w = parent.clientWidth;
+    var h = parent.clientHeight;
+    canvas.width = w * 2;
+    canvas.height = h * 2;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+
+    var barW = w / 24;
+    var prices = [];
+    for (var i = 0; i < 24; i++) {
+        var rec = hourlyData.find(function(hr) { return hr.hour === i; });
+        prices.push(rec ? getHourPrice(rec) : 0);
+    }
+
+    var maxP = Math.max.apply(null, prices.concat([0.001]));
+    var avg = prices.reduce(function(a, b) { return a + b; }, 0) / 24;
+
+    ctx.clearRect(0, 0, w, h);
+
+    for (var i = 0; i < 24; i++) {
+        var barH = prices[i] > 0 ? (prices[i] / maxP) * (h - 8) : 0;
+        var x = i * barW;
+        var y = h - barH;
+
+        if (prices[i] < avg * 0.8) ctx.fillStyle = 'rgba(34, 197, 94, 0.6)';
+        else if (prices[i] > avg * 1.2) ctx.fillStyle = 'rgba(244, 63, 94, 0.6)';
+        else ctx.fillStyle = 'rgba(129, 140, 248, 0.5)';
+
+        ctx.fillRect(x + 1, y, barW - 2, barH);
+    }
+}
+
+function positionHandle(startHour) {
+    var timeline = document.getElementById('simTimeline');
+    var handle = document.getElementById('simHandle');
+    var w = timeline.clientWidth;
+    var barW = w / 24;
+
+    handle.style.left = (startHour * barW) + 'px';
+    handle.style.width = (simSlots * barW) + 'px';
+
+    var endHour = startHour + simSlots;
+    document.getElementById('simHandleLabel').textContent =
+        String(startHour).padStart(2, '0') + ':00 - ' + String(endHour).padStart(2, '0') + ':00';
+}
+
+function renderSimHours() {
+    var container = document.getElementById('simHours');
+    var html = '';
+    for (var i = 0; i < 24; i += 3) {
+        html += '<span>' + String(i).padStart(2, '0') + ':00</span>';
+    }
+    container.innerHTML = html;
+}
+
+function setupDragEvents() {
+    if (dragBound) return;
+    dragBound = true;
+
+    var timeline = document.getElementById('simTimeline');
+
+    function onMove(clientX) {
+        if (!isDragging) return;
+        var rect = timeline.getBoundingClientRect();
+        var x = clientX - rect.left;
+        var barW = rect.width / 24;
+        var startH = Math.round(x / barW - simSlots / 2);
+        startH = Math.max(0, Math.min(24 - simSlots, startH));
+        simStartHour = startH;
+        positionHandle(startH);
+        updateSimReadout();
+    }
+
+    var tooltip = document.getElementById('simTooltip');
+
+    function showTooltip() { tooltip.classList.add('visible'); }
+    function hideTooltip() { tooltip.classList.remove('visible'); }
+
+    timeline.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        showTooltip();
+        onMove(e.clientX);
+    });
+    window.addEventListener('mousemove', function(e) { onMove(e.clientX); });
+    window.addEventListener('mouseup', function() { isDragging = false; hideTooltip(); });
+
+    timeline.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        isDragging = true;
+        showTooltip();
+        onMove(e.touches[0].clientX);
+    });
+    window.addEventListener('touchmove', function(e) {
+        if (isDragging) onMove(e.touches[0].clientX);
+    });
+    window.addEventListener('touchend', function() { isDragging = false; hideTooltip(); });
+
+    // Also show on hover
+    timeline.addEventListener('mouseenter', function() { showTooltip(); });
+    timeline.addEventListener('mouseleave', function() { if (!isDragging) hideTooltip(); });
+}
+
+function updateSimReadout() {
+    var yourCost = windowCost(simStartHour);
+    var optCost = simOptimal.cost;
+    var diff = yourCost - optCost;
+    var unit = currentCurrency;
+
+    var endH = simStartHour + simSlots;
+    var optEndH = simOptimal.start + simSlots;
+
+    document.getElementById('simYourTime').textContent =
+        String(simStartHour).padStart(2, '0') + ':00 - ' + String(endH).padStart(2, '0') + ':00';
+    var feesPerKwh = 0.347; // total additional fees DKK/kWh
+    var yourTotal = (yourCost + feesPerKwh * simKwh) * 1.25;
+    var optTotal = (optCost + feesPerKwh * simKwh) * 1.25;
+    document.getElementById('simYourCost').textContent = yourTotal.toFixed(2) + ' DKK';
+
+    document.getElementById('simOptTime').textContent =
+        String(simOptimal.start).padStart(2, '0') + ':00 - ' + String(optEndH).padStart(2, '0') + ':00';
+    document.getElementById('simOptCost').textContent = optTotal.toFixed(2) + ' DKK';
+
+    // Update tooltip
+    var appName = selectedAppliance ? selectedAppliance.querySelector('.appliance-name').textContent : 'Apparat';
+    var avgPriceKwh = simKwh > 0 ? yourCost / simKwh : 0;
+    document.getElementById('simTooltipTitle').textContent = appName;
+    document.getElementById('simTooltipTime').textContent =
+        String(simStartHour).padStart(2, '0') + ':00 - ' + String(endH).padStart(2, '0') + ':00';
+    document.getElementById('simTooltipKwh').textContent = simKwh.toFixed(1) + ' kWh';
+    document.getElementById('simTooltipPriceKwh').textContent = avgPriceKwh.toFixed(3) + ' ' + unit + '/kWh';
+    document.getElementById('simTooltipCost').textContent = yourTotal.toFixed(2) + ' DKK (inkl. afgifter)';
+    var totalDiff = yourTotal - optTotal;
+    if (totalDiff < 0.01) {
+        document.getElementById('simTooltipVsOpt').innerHTML = '<span class="sav-green">' + t('thisIsOptTime') + '</span>';
+    } else {
+        document.getElementById('simTooltipVsOpt').innerHTML = '<span class="sav-red">+' + totalDiff.toFixed(2) + ' DKK</span>';
+    }
+
+    // Diff bar
+    var fill = document.getElementById('simDiffFill');
+    var diffText = document.getElementById('simDiffText');
+    var maxDiff = simWorst.cost - optCost;
+
+    if (diff < 0.01) {
+        fill.style.width = '100%';
+        fill.style.background = '#22c55e';
+        diffText.innerHTML = '<span class="sav-green">' + t('thisIsOptimal') + '</span>';
+    } else {
+        var pct = maxDiff > 0 ? Math.min(100, (1 - diff / maxDiff) * 100) : 100;
+        fill.style.width = pct + '%';
+        fill.style.background = diff > maxDiff * 0.5 ? '#f43f5e' : diff > maxDiff * 0.2 ? '#facc15' : '#22c55e';
+        diffText.innerHTML = t('youPay') + ' <span class="sav-red">+' + diff.toFixed(2) + ' ' + unit + '</span> ' + t('moreThanOptimal') + ' <strong>' + appName + '</strong> ' + t('runsInPeriod');
+    }
+
+    updateSimTable(yourCost, optCost, diff);
+}
+
+function updateSimTable(yourCost, optCost, diff) {
+    var unit = currentCurrency;
+    var tbody = document.getElementById('simTableBody');
+
+    var yourAvgPrice = simKwh > 0 ? yourCost / simKwh : 0;
+    var optAvgPrice = simKwh > 0 ? optCost / simKwh : 0;
+    var priceDiff = yourAvgPrice - optAvgPrice;
+    var kwhPerHour = simSlots > 0 ? simKwh / simSlots : 0;
+
+    var diffClass = diff > 0.01 ? 'diff-positive' : diff < -0.01 ? 'diff-negative' : 'diff-zero';
+    var diffSign = diff > 0 ? '+' : '';
+    var pdSign = priceDiff > 0 ? '+' : '';
+
+    var html =
+        '<tr style="background:rgba(56,189,248,0.05)">' +
+            '<td><strong>' + t('totalPrice') + '</strong></td>' +
+            '<td class="sav-blue"><strong>' + yourCost.toFixed(2) + ' ' + unit + '</strong></td>' +
+            '<td class="sav-green"><strong>' + optCost.toFixed(2) + ' ' + unit + '</strong></td>' +
+            '<td class="' + diffClass + '"><strong>' + diffSign + diff.toFixed(2) + ' ' + unit + '</strong></td>' +
+        '</tr>' +
+        '<tr>' +
+            '<td>' + t('totalConsumption') + '</td>' +
+            '<td>' + simKwh.toFixed(1) + ' kWh</td>' +
+            '<td>' + simKwh.toFixed(1) + ' kWh</td>' +
+            '<td class="diff-zero">0</td>' +
+        '</tr>' +
+        '<tr>' +
+            '<td>' + t('avgPriceKwh') + '</td>' +
+            '<td>' + yourAvgPrice.toFixed(3) + ' ' + unit + '/kWh</td>' +
+            '<td>' + optAvgPrice.toFixed(3) + ' ' + unit + '/kWh</td>' +
+            '<td class="' + diffClass + '">' + pdSign + priceDiff.toFixed(3) + ' ' + unit + '/kWh</td>' +
+        '</tr>' +
+        '<tr>' +
+            '<td>' + t('durationLabel') + '</td>' +
+            '<td>' + simSlots + 'h</td>' +
+            '<td>' + simSlots + 'h</td>' +
+            '<td class="diff-zero">0</td>' +
+        '</tr>';
+
+    // Hourly breakdown header
+    html += '<tr style="background:#1e293b"><td colspan="4" style="text-align:center;color:#94a3b8;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;padding:8px">' + t('hourlyBreakdown') + '</td></tr>';
+    html += '<tr style="background:#1e293b">' +
+        '<td style="color:#94a3b8;font-size:0.7rem">' + t('thHour') + '</td>' +
+        '<td style="color:#38bdf8;font-size:0.7rem;text-align:center">' + t('yourKwh') + '</td>' +
+        '<td style="color:#22c55e;font-size:0.7rem;text-align:center">' + t('optKwh') + '</td>' +
+        '<td style="color:#94a3b8;font-size:0.7rem;text-align:center">' + t('difference') + '</td>' +
+    '</tr>';
+
+    // Per-hour breakdown
+    for (var j = 0; j < simSlots; j++) {
+        var yourH = simStartHour + j;
+        var optH = simOptimal.start + j;
+        var yourRec = hourlyData.find(function(h) { return h.hour === yourH; });
+        var optRec = hourlyData.find(function(h) { return h.hour === optH; });
+        var yourP = yourRec ? getHourPrice(yourRec) : 0;
+        var optP = optRec ? getHourPrice(optRec) : 0;
+        var yourHCost = yourP * kwhPerHour;
+        var optHCost = optP * kwhPerHour;
+        var hDiff = yourHCost - optHCost;
+        var hDiffClass = hDiff > 0.001 ? 'diff-positive' : hDiff < -0.001 ? 'diff-negative' : 'diff-zero';
+        var hSign = hDiff > 0 ? '+' : '';
+
+        html += '<tr>' +
+            '<td>' + String(yourH).padStart(2,'0') + ':00 / ' + String(optH).padStart(2,'0') + ':00</td>' +
+            '<td style="font-size:0.8rem">' + kwhPerHour.toFixed(1) + ' × ' + yourP.toFixed(3) + ' = <span class="sav-blue">' + yourHCost.toFixed(2) + '</span></td>' +
+            '<td style="font-size:0.8rem">' + kwhPerHour.toFixed(1) + ' × ' + optP.toFixed(3) + ' = <span class="sav-green">' + optHCost.toFixed(2) + '</span></td>' +
+            '<td class="' + hDiffClass + '" style="font-size:0.8rem">' + hSign + hDiff.toFixed(2) + ' ' + unit + '</td>' +
+        '</tr>';
+    }
+
+    // Savings summary row
+    if (diff > 0.01) {
+        var dailySaving = diff;
+        var monthlySaving = dailySaving * 30;
+        var yearlySaving = dailySaving * 365;
+        html += '<tr style="background:rgba(34,197,94,0.08)">' +
+            '<td colspan="4" style="text-align:center;padding:12px">' +
+            '<span style="color:#94a3b8;font-size:0.8rem">' + t('savingText') + '</span>' +
+            '<span class="sav-green" style="font-size:0.9rem;font-weight:700">' + dailySaving.toFixed(2) + ' ' + unit + t('perDay') + '</span>' +
+            '<span style="color:#64748b"> | </span>' +
+            '<span class="sav-green">' + monthlySaving.toFixed(1) + ' ' + unit + t('perMonth') + '</span>' +
+            '<span style="color:#64748b"> | </span>' +
+            '<span class="sav-green">' + yearlySaving.toFixed(0) + ' ' + unit + t('perYear') + '</span>' +
+            '</td></tr>';
+    }
+
+    // ===== TOTAL COST WITH FEES =====
+    // Danish electricity additional costs (DKK/kWh, 2025 rates)
+    var elafgift = 0.008;       // Elafgift (electricity tax)
+    var systemtarif = 0.054;    // Systemtarif (Energinet)
+    var transmissionstarif = 0.049; // Transmissionsnettarif
+    var nettarif = 0.236;       // Nettarif / distribution (avg)
+    var totalFees = elafgift + systemtarif + transmissionstarif + nettarif; // ~0.347 DKK/kWh
+    var vatRate = 0.25;
+
+    var feesCostYour = totalFees * simKwh;
+    var feesCostOpt = totalFees * simKwh;
+    var spotYourNoFees = yourCost;
+    var spotOptNoFees = optCost;
+    var totalYourPreVat = spotYourNoFees + feesCostYour;
+    var totalOptPreVat = spotOptNoFees + feesCostOpt;
+    var vatYour = totalYourPreVat * vatRate;
+    var vatOpt = totalOptPreVat * vatRate;
+    var grandYour = totalYourPreVat + vatYour;
+    var grandOpt = totalOptPreVat + vatOpt;
+    var grandDiff = grandYour - grandOpt;
+    var gdClass = grandDiff > 0.01 ? 'diff-positive' : grandDiff < -0.01 ? 'diff-negative' : 'diff-zero';
+    var gdSign = grandDiff > 0 ? '+' : '';
+
+    var feeLabel = currentLang === 'ba' ? 'Ukupni trošak sa svim naknadama' : 'Samlet pris inkl. afgifter og moms';
+    var spotLabel = currentLang === 'ba' ? 'Spot cijena (energija)' : 'Spotpris (energi)';
+    var elafLabel = currentLang === 'ba' ? 'Porez na struju' : 'Elafgift';
+    var sysLabel = currentLang === 'ba' ? 'Sistemska tarifa' : 'Systemtarif';
+    var transLabel = currentLang === 'ba' ? 'Transmisija' : 'Transmissionstarif';
+    var netLabel = currentLang === 'ba' ? 'Mrežna tarifa (distribucija)' : 'Nettarif (distribution)';
+    var vatLabel = currentLang === 'ba' ? 'PDV (25%)' : 'Moms (25%)';
+    var totalLabel = currentLang === 'ba' ? 'UKUPNO ZA PLAĆANJE' : 'TOTAL AT BETALE';
+    var feesNote = currentLang === 'ba' ? 'Naknade su prosječne za 2025. Mrežna tarifa varira po distributeru.' : 'Afgifter er gennemsnitlige for 2025. Nettarif varierer efter netselskab.';
+
+    html += '<tr style="background:rgba(168,85,247,0.08)"><td colspan="4" style="text-align:center;color:#a78bfa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;padding:10px;font-weight:700">' + feeLabel + '</td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">⚡ ' + spotLabel + '</td>' +
+        '<td class="sav-blue" style="font-size:0.85rem">' + spotYourNoFees.toFixed(2) + ' DKK</td>' +
+        '<td class="sav-green" style="font-size:0.85rem">' + spotOptNoFees.toFixed(2) + ' DKK</td>' +
+        '<td style="font-size:0.8rem;color:#64748b">' + (spotYourNoFees/simKwh).toFixed(3) + ' DKK/kWh</td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">📋 ' + elafLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (elafgift * simKwh).toFixed(2) + ' DKK (' + elafgift.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🔌 ' + sysLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (systemtarif * simKwh).toFixed(2) + ' DKK (' + systemtarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🏗️ ' + transLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (transmissionstarif * simKwh).toFixed(2) + ' DKK (' + transmissionstarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🔧 ' + netLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (nettarif * simKwh).toFixed(2) + ' DKK (' + nettarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr style="border-top:1px solid var(--border-color)"><td style="color:#94a3b8;font-size:0.8rem">🏛️ ' + vatLabel + '</td>' +
+        '<td style="font-size:0.8rem;color:var(--text-secondary)">' + vatYour.toFixed(2) + ' DKK</td>' +
+        '<td style="font-size:0.8rem;color:var(--text-secondary)">' + vatOpt.toFixed(2) + ' DKK</td>' +
+        '<td></td></tr>';
+    html += '<tr style="background:rgba(168,85,247,0.12);border-top:2px solid #a78bfa">' +
+        '<td style="font-weight:700;color:#a78bfa;font-size:0.9rem">💰 ' + totalLabel + '</td>' +
+        '<td class="sav-blue" style="font-weight:700;font-size:1rem">' + grandYour.toFixed(2) + ' DKK</td>' +
+        '<td class="sav-green" style="font-weight:700;font-size:1rem">' + grandOpt.toFixed(2) + ' DKK</td>' +
+        '<td class="' + gdClass + '" style="font-weight:700">' + gdSign + grandDiff.toFixed(2) + ' DKK</td></tr>';
+    html += '<tr><td colspan="4" style="text-align:center;color:#64748b;font-size:0.7rem;font-style:italic;padding:8px">ℹ️ ' + feesNote + '</td></tr>';
+
+    tbody.innerHTML = html;
+}
+
+// Initial load
+fetchPrices();
+// Set initial map state (DK1 active)
+document.querySelectorAll('.dk2-region').forEach(function(el) { el.classList.add('map-dim'); });
+document.querySelectorAll('.dk1-region').forEach(function(el) { el.classList.add('map-active'); });
+
+// Auto-refresh every 5 minutes
+setInterval(fetchPrices, 5 * 60 * 1000);
+
+// ==========================================
+// GEOLOCATION: Auto-detect DK1 or DK2
+// ==========================================
+(function() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+        // Great Belt boundary ~10.9°E separates DK1 (west) and DK2 (east)
+        // Also check if user is roughly within Denmark bounds (54-58°N, 7-16°E)
+        if (lat >= 54 && lat <= 58 && lng >= 7 && lng <= 16) {
+            var detectedRegion = lng < 10.9 ? 'DK1' : 'DK2';
+            if (detectedRegion !== currentRegion) {
+                setRegion(detectedRegion);
+            }
+            // Show location pin on map
+            var mapSvg = document.getElementById('dkMapSvg');
+            if (mapSvg) {
+                // Map coordinate transform: lng 7-16 → x 50-420, lat 54-58 → y 360-5
+                var mapX = 50 + (lng - 7) * (370 / 9);
+                var mapY = 360 - (lat - 54) * (355 / 4);
+                var pin = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                pin.innerHTML = '<circle cx="' + mapX + '" cy="' + mapY + '" r="6" fill="#fbbf24" stroke="#fff" stroke-width="2" opacity="0.95"/>' +
+                    '<circle cx="' + mapX + '" cy="' + mapY + '" r="10" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.6">' +
+                    '<animate attributeName="r" from="6" to="16" dur="1.5s" repeatCount="indefinite"/>' +
+                    '<animate attributeName="opacity" from="0.6" to="0" dur="1.5s" repeatCount="indefinite"/>' +
+                    '</circle>' +
+                    '<text x="' + (mapX + 14) + '" y="' + (mapY + 4) + '" font-size="10" fill="#fbbf24" font-weight="bold">📍 ' + (currentLang === 'ba' ? 'Vi ste ovdje' : 'Du er her') + '</text>';
+                mapSvg.appendChild(pin);
+            }
+        }
+    }, function(err) {
+        // Geolocation denied or failed — just use default DK1
+        console.log('Geolocation not available:', err.message);
+    }, { timeout: 8000, maximumAge: 300000 });
+})();
+
+// ==========================================
+// VISIT STATISTICS + ADMIN PANEL
+// ==========================================
+
+// Record visit in localStorage (for local data)
+(function() {
+    var VISITS_KEY = 'dk_dashboard_visits';
+    var visits = JSON.parse(localStorage.getItem(VISITS_KEY) || '[]');
+    visits.push({
+        time: new Date().toISOString(),
+        page: location.pathname || '/',
+        ref: document.referrer || 'direkte',
+        ua: navigator.userAgent,
+        lang: navigator.language,
+        screen: screen.width + 'x' + screen.height
+    });
+    // Keep last 10000 visits
+    if (visits.length > 10000) visits = visits.slice(-10000);
+    localStorage.setItem(VISITS_KEY, JSON.stringify(visits));
+})();
+
+// Admin panel functionality
+function openAdminPanel() {
+    // PROMIJENI LOZINKU OVDJE:
+    var ADMIN_PASSWORD = 'admin2024';
+
+    var pwd = prompt('🔒 Admin adgang - Indtast adgangskode:');
+    if (pwd !== ADMIN_PASSWORD) {
+        if (pwd !== null) alert('Forkert adgangskode!');
+        return;
+    }
+
+    var VISITS_KEY = 'dk_dashboard_visits';
+    var visits = JSON.parse(localStorage.getItem(VISITS_KEY) || '[]');
+
+    // Statistics
+    var totalVisits = visits.length;
+    var today = new Date().toISOString().slice(0, 10);
+    var todayVisits = visits.filter(function(v) { return v.time.slice(0, 10) === today; }).length;
+
+    // Visits per day (last 30 days)
+    var dailyMap = {};
+    visits.forEach(function(v) {
+        var d = v.time.slice(0, 10);
+        dailyMap[d] = (dailyMap[d] || 0) + 1;
+    });
+    var dailyKeys = Object.keys(dailyMap).sort().slice(-30);
+
+    // Visits per hour today
+    var hourlyMap = {};
+    visits.filter(function(v) { return v.time.slice(0, 10) === today; }).forEach(function(v) {
+        var h = new Date(v.time).getHours();
+        hourlyMap[h] = (hourlyMap[h] || 0) + 1;
+    });
+
+    // Referrers
+    var refMap = {};
+    visits.forEach(function(v) {
+        var r = v.ref || 'direkte';
+        if (r.length > 50) r = r.substring(0, 50) + '...';
+        refMap[r] = (refMap[r] || 0) + 1;
+    });
+    var topRefs = Object.entries(refMap).sort(function(a,b) { return b[1] - a[1]; }).slice(0, 10);
+
+    // Browsers
+    var browserMap = {};
+    visits.forEach(function(v) {
+        var ua = v.ua || '';
+        var browser = 'Ostalo';
+        if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) browser = 'Chrome';
+        else if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+        else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) browser = 'Safari';
+        else if (ua.indexOf('Edg') > -1) browser = 'Edge';
+        browserMap[browser] = (browserMap[browser] || 0) + 1;
+    });
+
+    // Screen resolutions
+    var screenMap = {};
+    visits.forEach(function(v) {
+        var s = v.screen || 'nepoznato';
+        screenMap[s] = (screenMap[s] || 0) + 1;
+    });
+    var topScreens = Object.entries(screenMap).sort(function(a,b) { return b[1] - a[1]; }).slice(0, 5);
+
+    // Unique visitors (per day, roughly - by screen+lang combination)
+    var uniqueMap = {};
+    visits.forEach(function(v) {
+        var key = (v.screen || '') + '|' + (v.lang || '');
+        uniqueMap[key] = true;
+    });
+    var uniqueVisitors = Object.keys(uniqueMap).length;
+
+    // Generate admin panel HTML
+    var overlay = document.createElement('div');
+    overlay.id = 'adminOverlay';
+    var bgColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.85)';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:' + bgColor + ';z-index:10000;overflow-y:auto;padding:20px';
+
+    var dailyBars = '';
+    var maxDaily = Math.max.apply(null, dailyKeys.map(function(k) { return dailyMap[k]; }));
+    dailyKeys.forEach(function(k) {
+        var pct = maxDaily > 0 ? (dailyMap[k] / maxDaily * 100) : 0;
+        var dayName = new Date(k).toLocaleDateString('da-DK', { weekday: 'short', day: 'numeric', month: 'short' });
+        dailyBars += '<div style="display:flex;align-items:center;gap:8px;margin:2px 0">' +
+            '<span style="min-width:100px;font-size:0.75rem;color:#94a3b8;text-align:right">' + dayName + '</span>' +
+            '<div style="flex:1;background:#1e293b;border-radius:3px;height:18px;overflow:hidden">' +
+            '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:3px;min-width:' + (dailyMap[k] > 0 ? '20px' : '0') + '"></div></div>' +
+            '<span style="min-width:30px;font-size:0.75rem;color:#e2e8f0">' + dailyMap[k] + '</span></div>';
+    });
+
+    var hourlyBars = '';
+    var maxHourly = 0;
+    for (var hh = 0; hh < 24; hh++) { if ((hourlyMap[hh] || 0) > maxHourly) maxHourly = hourlyMap[hh]; }
+    for (var hh = 0; hh < 24; hh++) {
+        var cnt = hourlyMap[hh] || 0;
+        var pct = maxHourly > 0 ? (cnt / maxHourly * 100) : 0;
+        hourlyBars += '<div style="display:flex;align-items:center;gap:8px;margin:1px 0">' +
+            '<span style="min-width:40px;font-size:0.7rem;color:#94a3b8;text-align:right">' + String(hh).padStart(2,'0') + ':00</span>' +
+            '<div style="flex:1;background:#1e293b;border-radius:3px;height:14px;overflow:hidden">' +
+            '<div style="width:' + pct + '%;height:100%;background:#22c55e;border-radius:3px;min-width:' + (cnt > 0 ? '15px' : '0') + '"></div></div>' +
+            '<span style="min-width:20px;font-size:0.7rem;color:#e2e8f0">' + cnt + '</span></div>';
+    }
+
+    var refRows = '';
+    topRefs.forEach(function(r) {
+        refRows += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:#cbd5e1;border-bottom:1px solid #334155;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + r[0] + '</td>' +
+            '<td style="padding:4px 8px;font-size:0.8rem;color:#38bdf8;border-bottom:1px solid #334155;text-align:right">' + r[1] + '</td></tr>';
+    });
+
+    var browserRows = '';
+    Object.entries(browserMap).sort(function(a,b) { return b[1] - a[1]; }).forEach(function(b) {
+        browserRows += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:#cbd5e1;border-bottom:1px solid #334155">' + b[0] + '</td>' +
+            '<td style="padding:4px 8px;font-size:0.8rem;color:#38bdf8;border-bottom:1px solid #334155;text-align:right">' + b[1] + '</td></tr>';
+    });
+
+    var screenRows = '';
+    topScreens.forEach(function(s) {
+        screenRows += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:#cbd5e1;border-bottom:1px solid #334155">' + s[0] + '</td>' +
+            '<td style="padding:4px 8px;font-size:0.8rem;color:#38bdf8;border-bottom:1px solid #334155;text-align:right">' + s[1] + '</td></tr>';
+    });
+
+    overlay.innerHTML = '<div style="max-width:900px;margin:0 auto">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">' +
+        '<h2 style="color:#38bdf8;font-size:1.4rem">📊 Admin Panel - Besøgsstatistik</h2>' +
+        '<button onclick="document.getElementById(\'adminOverlay\').remove()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:0.9rem">✕ Luk</button></div>' +
+
+        '<!-- Cards with numbers -->' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px">' +
+        '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:16px;text-align:center">' +
+        '<div style="color:#94a3b8;font-size:0.8rem">Samlede besøg</div><div style="color:#38bdf8;font-size:1.8rem;font-weight:700">' + totalVisits + '</div></div>' +
+        '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:16px;text-align:center">' +
+        '<div style="color:#94a3b8;font-size:0.8rem">I dag</div><div style="color:#22c55e;font-size:1.8rem;font-weight:700">' + todayVisits + '</div></div>' +
+        '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:16px;text-align:center">' +
+        '<div style="color:#94a3b8;font-size:0.8rem">Unikke besøgende (estimat)</div><div style="color:#818cf8;font-size:1.8rem;font-weight:700">' + uniqueVisitors + '</div></div>' +
+        '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:16px;text-align:center">' +
+        '<div style="color:#94a3b8;font-size:0.8rem">Sporede dage</div><div style="color:#f59e0b;font-size:1.8rem;font-weight:700">' + dailyKeys.length + '</div></div>' +
+        '</div>' +
+
+        '<!-- Daily chart -->' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;margin-bottom:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">📅 Besøg pr. dag (sidste 30 dage)</h3>' +
+        dailyBars + '</div>' +
+
+        '<!-- Hourly chart -->' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;margin-bottom:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">🕐 Besøg pr. time (i dag)</h3>' +
+        hourlyBars + '</div>' +
+
+        '<!-- Tables -->' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:16px">' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">🔗 Henvisningskilder</h3>' +
+        '<table style="width:100%">' + refRows + '</table></div>' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">🌐 Browsere</h3>' +
+        '<table style="width:100%">' + browserRows + '</table></div>' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">📱 Skærmopløsninger</h3>' +
+        '<table style="width:100%">' + screenRows + '</table></div>' +
+        '</div>' +
+
+        '<!-- GA4 info -->' +
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;margin-bottom:16px">' +
+        '<h3 style="color:#e2e8f0;font-size:1rem;margin-bottom:10px">🔧 Google Analytics 4 (anbefalet)</h3>' +
+        '<p style="color:#94a3b8;font-size:0.85rem;line-height:1.5">Dette panel viser lokale data (localStorage). ' +
+        'For komplet analytik med alle besøgende på ét sted, anbefaler vi <strong style="color:#38bdf8">Google Analytics 4</strong>:</p>' +
+        '<ol style="color:#94a3b8;font-size:0.85rem;line-height:1.8;margin:10px 0 0 20px">' +
+        '<li>Gå til <a href="https://analytics.google.com" target="_blank" style="color:#38bdf8">analytics.google.com</a></li>' +
+        '<li>Opret en gratis konto og nyt "Property"</li>' +
+        '<li>Kopier dit Measurement ID (ser ud som <code style="background:#1e293b;padding:2px 6px;border-radius:3px;color:#f59e0b">G-XXXXXXXXXX</code>)</li>' +
+        '<li>Erstat <code style="background:#1e293b;padding:2px 6px;border-radius:3px;color:#f59e0b">G-XXXXXXXXXX</code> i koden på denne fil</li>' +
+        '<li>Statistikker er kun tilgængelige for dig i Google Analytics dashboard</li>' +
+        '</ol></div>' +
+
+        '<!-- Export -->' +
+        '<div style="text-align:center;margin-bottom:20px">' +
+        '<button onclick="exportVisitData()" style="background:#334155;color:#e2e8f0;border:1px solid #475569;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.85rem;margin:0 4px">📥 Eksportér data (CSV)</button>' +
+        '<button onclick="if(confirm(\'Slet alle besøgsdata?\'))localStorage.removeItem(\'dk_dashboard_visits\')" style="background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.85rem;margin:0 4px">🗑 Slet data</button>' +
+        '</div></div>';
+
+    document.body.appendChild(overlay);
+}
+
+function exportVisitData() {
+    var visits = JSON.parse(localStorage.getItem('dk_dashboard_visits') || '[]');
+    var csv = 'Dato,Side,Henvisning,Browser,Sprog,Skærm\n';
+    visits.forEach(function(v) {
+        csv += '"' + v.time + '","' + (v.page||'') + '","' + (v.ref||'') + '","' + (v.ua||'').substring(0,80) + '","' + (v.lang||'') + '","' + (v.screen||'') + '"\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'besog_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+}
+
+// ==========================================
+// GOOGLE ANALYTICS 4 (Erstat G-XXXXXXXXXX med dit ID)
+// ==========================================
+(function() {
+    var GA_ID = 'G-XXXXXXXXXX'; // <-- DIT Google Analytics Measurement ID
+    if (GA_ID === 'G-XXXXXXXXXX') return; // Indlæs ikke før rigtig ID er sat
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+})();
+</script>
+
+<!-- Admin button (fixed, small, bottom right corner) -->
+<div onclick="openAdminPanel()" style="position:fixed;bottom:16px;right:16px;width:40px;height:40px;background:rgba(30,41,59,0.8);border:1px solid #334155;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;z-index:9999;opacity:0.4;transition:opacity 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Admin panel">📊</div>
+
+<script>
+// Theme toggle functionality
+function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme') || 'dark';
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('dk_dashboard_theme', next);
+    document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+    // Re-render chart with appropriate colors
+    if (typeof renderAll === 'function' && hourlyData && hourlyData.length) renderAll();
+}
+
+// On page load, restore theme preference
+(function() {
+    var saved = localStorage.getItem('dk_dashboard_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    setTimeout(function() {
+        var icon = document.getElementById('themeIcon');
+        if (icon) icon.textContent = saved === 'dark' ? '☀️' : '🌙';
+    }, 0);
+})();
+
+// ==========================================
+// LANGUAGE TOGGLE (DK / BA)
+// ==========================================
+var currentLang = localStorage.getItem('dk_dashboard_lang') || 'dk';
+
+var LANG = {
+    dk: {
+        title: 'Elpris i Danmark',
+        subtitle: 'Spotpriser fra Energi Data Service (energidataservice.dk)',
+        connecting: 'Forbinder...',
+        connected: 'Forbundet',
+        updated: 'Opdateret',
+        errorLoading: 'Fejl ved indl\u00e6sning',
+        noData: 'Ingen data for i dag. Priser for n\u00e6ste dag offentligg\u00f8res omkring kl. 13.',
+        cannotLoad: 'Kan ikke indl\u00e6se data. Pr\u00f8v igen.',
+        dk1: 'DK1 - Vestdanmark',
+        dk2: 'DK2 - \u00d8stdanmark',
+        currentPrice: 'Aktuel pris',
+        lowestToday: 'Laveste i dag',
+        highestToday: 'H\u00f8jeste i dag',
+        avgToday: 'Gennemsnit i dag',
+        hourlyPrices: 'Timepriser i dag',
+        priceOverview: 'Timeoversigt over priser',
+        thHour: 'Time',
+        thPriceDKK: 'Pris (DKK/kWh)',
+        thPriceEUR: 'Pris (EUR/kWh)',
+        thLevel: 'Niveau',
+        badgeLow: 'Lav',
+        badgeMid: 'Middel',
+        badgeHigh: 'H\u00f8j',
+        now: 'nu',
+        loadingData: 'Indl\u00e6ser data...',
+        simTitle: 'Forbrugssimulator \u2014 tr\u00e6k rektanglet og se prisforskellen',
+        washer: 'Vaskemaskine',
+        dryer: 'T\u00f8rretumbler',
+        oven: 'Ovn',
+        dishwasher: 'Opvaskemaskine',
+        ev7: 'Elbil opladning (7kW)',
+        ev11: 'Elbil opladning (11kW)',
+        duration: 'Varighed:',
+        consumption: 'Forbrug (kWh):',
+        hour1: '1 time',
+        hours: 'timer',
+        yourChoice: 'Dit valg',
+        optimal: 'Optimalt',
+        dragToCompare: 'Tr\u00e6k rektanglet for at sammenligne',
+        thisIsOptimal: 'Dette ER den optimale tid!',
+        youPay: 'Du betaler',
+        moreThanOptimal: 'mere end optimalt hvis',
+        runsInPeriod: 'k\u00f8rer i denne periode',
+        vsOptimal: 'vs Optimal:',
+        thisIsOptTime: 'Ovo JE optimalno vrijeme!',
+        totalPrice: 'Samlet pris',
+        totalConsumption: 'Samlet forbrug',
+        avgPriceKwh: 'Gennemsnitspris/kWh',
+        durationLabel: 'Varighed',
+        hourlyBreakdown: 'Timebaseret forbrugsoversigt',
+        yourKwh: 'Dit: kWh \u00d7 pris = omkostning',
+        optKwh: 'Opt: kWh \u00d7 pris = omkostning',
+        difference: 'Forskel',
+        savingText: 'Besparelse ved brug af optimal tid: ',
+        perDay: '/dag',
+        perMonth: '/m\u00e5ned',
+        perYear: '/\u00e5r',
+        footerSource: 'Kilde:',
+        footerUpdate: 'Priserne opdateres automatisk hvert 5. minut',
+        footerSpot: 'Spotpriser er fra Nord Pool-b\u00f8rsen',
+        tooltipConsumption: 'Forbrug:',
+        tooltipPriceKwh: 'Pris/kWh:',
+        tooltipTotalPrice: 'Samlet pris:',
+        price: 'Pris'
+    },
+    ba: {
+        title: 'Cijene struje u Danskoj',
+        subtitle: 'Spot cijene sa Energi Data Service (energidataservice.dk)',
+        connecting: 'Povezivanje...',
+        connected: 'Povezano',
+        updated: 'A\u017eurirano',
+        errorLoading: 'Gre\u0161ka pri u\u010ditavanju',
+        noData: 'Nema podataka za danas. Cijene za sutra se objavljuju oko 13h.',
+        cannotLoad: 'Nije mogu\u0107e u\u010ditati podatke. Poku\u0161ajte ponovo.',
+        dk1: 'DK1 - Zapadna Danska',
+        dk2: 'DK2 - Isto\u010dna Danska',
+        currentPrice: 'Trenutna cijena',
+        lowestToday: 'Najni\u017ea danas',
+        highestToday: 'Najvi\u0161a danas',
+        avgToday: 'Prosjek danas',
+        hourlyPrices: 'Satne cijene danas',
+        priceOverview: 'Pregled cijena po satima',
+        thHour: 'Sat',
+        thPriceDKK: 'Cijena (DKK/kWh)',
+        thPriceEUR: 'Cijena (EUR/kWh)',
+        thLevel: 'Nivo',
+        badgeLow: 'Niska',
+        badgeMid: 'Srednja',
+        badgeHigh: 'Visoka',
+        now: 'sad',
+        loadingData: 'U\u010ditavanje podataka...',
+        simTitle: 'Simulator potro\u0161nje \u2014 povucite pravougaonik i vidite razliku u cijeni',
+        washer: 'Ve\u0161 ma\u0161ina',
+        dryer: 'Su\u0161ilica',
+        oven: 'Pe\u0107nica',
+        dishwasher: 'Ma\u0161ina za sudove',
+        ev7: 'Punjenje el. auta (7kW)',
+        ev11: 'Punjenje el. auta (11kW)',
+        duration: 'Trajanje:',
+        consumption: 'Potro\u0161nja (kWh):',
+        hour1: '1 sat',
+        hours: 'sati',
+        yourChoice: 'Va\u0161 izbor',
+        optimal: 'Optimalno',
+        dragToCompare: 'Povucite pravougaonik za usporedbu',
+        thisIsOptimal: 'Ovo JE optimalno vrijeme!',
+        youPay: 'Pla\u0107ate',
+        moreThanOptimal: 'vi\u0161e od optimalnog ako',
+        runsInPeriod: 'radi u ovom periodu',
+        vsOptimal: 'vs Optimalno:',
+        thisIsOptTime: 'Ovo JE optimalno vrijeme!',
+        totalPrice: 'Ukupna cijena',
+        totalConsumption: 'Ukupna potro\u0161nja',
+        avgPriceKwh: 'Prosje\u010dna cijena/kWh',
+        durationLabel: 'Trajanje',
+        hourlyBreakdown: 'Satni pregled potro\u0161nje',
+        yourKwh: 'Va\u0161e: kWh \u00d7 cijena = tro\u0161ak',
+        optKwh: 'Opt: kWh \u00d7 cijena = tro\u0161ak',
+        difference: 'Razlika',
+        savingText: 'U\u0161teda kori\u0161tenjem optimalnog vremena: ',
+        perDay: '/dan',
+        perMonth: '/mjesec',
+        perYear: '/god',
+        footerSource: 'Izvor:',
+        footerUpdate: 'Cijene se automatski a\u017euriraju svakih 5 minuta',
+        footerSpot: 'Spot cijene su sa Nord Pool berze',
+        tooltipConsumption: 'Potro\u0161nja:',
+        tooltipPriceKwh: 'Cijena/kWh:',
+        tooltipTotalPrice: 'Ukupna cijena:',
+        price: 'Cijena'
+    }
+};
+
+function t(key) { return LANG[currentLang][key] || LANG['dk'][key] || key; }
+
+function applyLanguage() {
+    var L = LANG[currentLang];
+    document.getElementById('langToggle').textContent = currentLang === 'dk' ? 'DK' : 'BA';
+
+    // Header
+    document.querySelector('.header h1').textContent = L.title;
+    document.querySelector('.header .subtitle').textContent = L.subtitle;
+
+    // Region tabs
+    var tabs = document.querySelectorAll('.region-tab');
+    if (tabs[0]) tabs[0].textContent = L.dk1;
+    if (tabs[1]) tabs[1].textContent = L.dk2;
+    // Map legend labels (update if map exists)
+    var mapSvg = document.getElementById('dkMapSvg');
+    if (mapSvg) {
+        var legends = mapSvg.querySelectorAll('text[font-size="13"]');
+        if (legends[0]) legends[0].textContent = L.dk1.replace('DK1 - ','') + ' (DK1)';
+        if (legends[1]) legends[1].textContent = L.dk2.replace('DK2 - ','') + ' (DK2)';
+    }
+
+    // Card labels
+    var labels = document.querySelectorAll('.card-label');
+    if (labels[0]) labels[0].textContent = L.currentPrice;
+    if (labels[1]) labels[1].textContent = L.lowestToday;
+    if (labels[2]) labels[2].textContent = L.highestToday;
+    if (labels[3]) labels[3].textContent = L.avgToday;
+
+    // Chart title
+    document.querySelector('.chart-title').textContent = L.hourlyPrices;
+
+    // Table
+    document.querySelector('.table-title').textContent = L.priceOverview;
+    var ths = document.querySelectorAll('.table-container th');
+    if (ths[0]) ths[0].textContent = L.thHour;
+    if (ths[1]) ths[1].textContent = L.thPriceDKK;
+    if (ths[2]) ths[2].textContent = L.thPriceEUR;
+    if (ths[3]) ths[3].textContent = L.thLevel;
+
+    // Simulator title
+    document.querySelector('.appliance-title').textContent = L.simTitle;
+
+    // Appliance names
+    var names = document.querySelectorAll('.appliance-name');
+    var appNames = [L.washer, L.dryer, L.oven, L.dishwasher, L.ev7, L.ev11];
+    for (var i = 0; i < names.length && i < appNames.length; i++) {
+        names[i].textContent = appNames[i];
+    }
+
+    // Duration & consumption labels
+    var durLabels = document.querySelectorAll('.duration-selector label');
+    if (durLabels[0]) durLabels[0].textContent = L.duration;
+    if (durLabels[1]) durLabels[1].textContent = L.consumption;
+
+    // Duration options
+    var opts = document.getElementById('durationSelect').options;
+    for (var i = 0; i < opts.length; i++) {
+        var v = parseInt(opts[i].value);
+        opts[i].textContent = v === 1 ? L.hour1 : v + ' ' + L.hours;
+    }
+
+    // Sim readout labels
+    var readoutLabels = document.querySelectorAll('.sim-readout-label');
+    if (readoutLabels[0]) readoutLabels[0].textContent = L.yourChoice;
+    if (readoutLabels[1]) readoutLabels[1].textContent = L.optimal;
+
+    // Sim diff text
+    var diffText = document.getElementById('simDiffText');
+    if (diffText && diffText.textContent.indexOf('Tr\u00e6k') > -1 || diffText && diffText.textContent.indexOf('Povucite') > -1) {
+        diffText.textContent = L.dragToCompare;
+    }
+
+    // Tooltip labels
+    var tooltipLabels = document.querySelectorAll('.sim-tooltip-label');
+    if (tooltipLabels[0]) tooltipLabels[0].textContent = L.tooltipConsumption;
+    if (tooltipLabels[1]) tooltipLabels[1].textContent = L.tooltipPriceKwh;
+    if (tooltipLabels[2]) tooltipLabels[2].textContent = L.tooltipTotalPrice;
+    if (tooltipLabels[3]) tooltipLabels[3].textContent = L.vsOptimal;
+
+    // Sim table headers
+    var simThs = document.querySelectorAll('.sim-table th');
+    if (simThs[1]) simThs[1].textContent = L.yourChoice;
+    if (simThs[2]) simThs[2].textContent = L.optimal;
+    if (simThs[3]) simThs[3].textContent = L.difference;
+
+    // Footer
+    var footer = document.querySelector('.footer');
+    if (footer) {
+        footer.innerHTML = L.footerSource + ' <a href="https://www.energidataservice.dk" target="_blank" style="color:#60a5fa">Energi Data Service</a> | ' +
+            L.footerUpdate + ' | ' + L.footerSpot;
+    }
+
+    // Re-render dynamic content
+    if (typeof renderAll === 'function' && hourlyData && hourlyData.length) renderAll();
+}
+
+function toggleLang() {
+    currentLang = currentLang === 'dk' ? 'ba' : 'dk';
+    localStorage.setItem('dk_dashboard_lang', currentLang);
+    applyLanguage();
+}
+
+// Apply saved language on load
+(function() {
+    setTimeout(function() {
+        document.getElementById('langToggle').textContent = currentLang === 'dk' ? 'DK' : 'BA';
+        if (currentLang !== 'dk') applyLanguage();
+    }, 100);
+})();
+</script>
+
+</body>
+</html>
