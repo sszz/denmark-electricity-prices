@@ -140,6 +140,17 @@
             background: #3b82f6; border-color: #3b82f6; color: white; font-weight: 600;
         }
 
+        .dk-map-section {
+            max-width: 1000px; margin: 0 auto 24px; padding: 16px;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+        }
+        .dk-map-region { cursor: pointer; transition: all 0.3s ease; }
+        .dk-map-region:hover { filter: brightness(1.25); transform-origin: center; }
+        .dk1-region.map-active { filter: brightness(1.1) drop-shadow(0 0 10px rgba(59,130,246,0.6)); }
+        .dk2-region.map-active { filter: brightness(1.1) drop-shadow(0 0 10px rgba(220,38,38,0.6)); }
+        .dk1-region.map-dim { opacity: 0.4; }
+        .dk2-region.map-dim { opacity: 0.4; }
+
         .cards {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px; max-width: 1000px; margin: 0 auto 32px;
@@ -384,6 +395,8 @@
             .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .card-value { font-size: 1.4rem; }
             .appliance-grid { grid-template-columns: repeat(2, 1fr); }
+            .dk-map-section { padding: 10px; }
+            .dk-map-section svg { max-width: 300px; }
         }
     </style>
 </head>
@@ -409,6 +422,116 @@
 <div class="region-tabs">
     <button class="region-tab active" onclick="setRegion('DK1')">DK1 - Vestdanmark</button>
     <button class="region-tab" onclick="setRegion('DK2')">DK2 - Østdanmark</button>
+</div>
+
+<!-- Interactive Denmark Map -->
+<div class="dk-map-section">
+    <svg id="dkMapSvg" viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" style="max-width:460px;width:100%;margin:0 auto;display:block">
+        <defs>
+            <filter id="glow1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Sea background -->
+        <rect x="0" y="0" width="500" height="420" rx="8" fill="var(--bg-tertiary)" opacity="0.5"/>
+        <!-- DK1: Jylland (Jutland) - detailed coastline -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M120,6 L126,4 L134,2 L142,1 L150,3 L155,8 L152,14 L148,10 L143,14 L149,20
+            L155,18 L160,22 L157,28 L153,32 L158,36 L163,34 L168,30 L172,35 L168,42 L164,46
+            L170,44 L176,40 L180,36 L184,32 L180,40 L176,48 L173,54 L178,50 L183,46 L186,42
+            L188,48 L185,56 L181,62 L178,68 L182,66 L186,60 L189,56 L190,62 L188,70 L185,78
+            L181,84 L178,90 L183,88 L186,82 L188,78 L189,84 L187,92 L184,98 L180,104
+            L176,110 L178,116 L180,122 L178,128 L174,134 L170,140 L175,144 L179,148
+            L176,154 L172,160 L174,166 L178,170 L176,176 L172,182 L168,188 L164,194
+            L168,198 L172,194 L176,190 L174,196 L170,202 L166,208 L162,214 L158,220
+            L154,226 L150,232 L147,238 L152,236 L156,232 L158,238 L155,244 L150,250
+            L145,256 L140,262 L136,268 L132,274 L128,278 L122,282 L116,286 L110,290
+            L106,296 L110,300 L116,298 L120,294 L126,290 L130,286 L134,290 L130,296
+            L124,302 L118,306 L112,310 L108,316 L116,318 L124,316 L130,312 L136,308
+            L140,304 L146,300 L152,296 L156,300 L152,306 L146,310 L142,316 L148,320
+            L154,318 L158,314 L162,318 L160,324 L155,330 L148,334 L142,336 L136,332
+            L128,328 L122,324 L116,328 L112,334 L108,340 L102,344 L96,348 L90,350
+            L84,348 L80,342 L76,336 L72,330 L68,324 L64,318 L60,312 L58,306 L56,298
+            L58,290 L62,284 L66,278 L64,272 L60,266 L58,258 L60,250 L64,244 L68,238
+            L66,232 L62,226 L58,220 L56,214 L60,206 L64,200 L68,194 L70,188 L66,182
+            L62,176 L58,170 L56,162 L60,154 L64,148 L68,142 L72,136 L70,128 L66,122
+            L62,116 L58,108 L56,100 L60,92 L64,86 L68,80 L72,74 L76,68 L74,60
+            L70,54 L66,48 L64,40 L68,32 L72,26 L78,20 L84,16 L92,12 L100,8 L110,6 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK1: Nordjylland (north of Limfjorden) -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M100,4 L108,2 L118,6 L110,6 L100,8 L92,12 L84,16 L78,20 L72,26
+            L68,32 L64,40 L66,34 L70,28 L76,22 L82,16 L88,10 L96,6 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.8" stroke-linejoin="round" opacity="0"/>
+        <!-- DK1: Fyn (Funen) -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M172,305 L178,300 L186,298 L194,300 L202,304 L208,310 L212,318
+            L214,326 L212,334 L208,340 L202,344 L194,346 L186,344 L178,340
+            L174,334 L170,326 L168,318 L170,310 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK1: Als -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M130,332 L136,328 L142,330 L146,336 L148,344 L146,352 L140,356 L134,354 L130,348 L128,340 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK1: Langeland -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M198,350 L202,348 L205,354 L206,364 L204,374 L200,380 L196,376 L194,366 L195,356 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK1: Ærø -->
+        <path class="dk-map-region dk1-region" onclick="setRegion('DK1')"
+            d="M160,356 L170,352 L180,354 L186,358 L182,364 L172,366 L162,362 Z"
+            fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" stroke-linejoin="round"/>
+
+        <!-- Storebælt divider -->
+        <line x1="218" y1="290" x2="222" y2="370" stroke="#475569" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+        <!-- DK2: Sjælland (Zealand) - detailed -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M254,260 L262,254 L272,250 L282,248 L292,250 L302,254 L310,260
+            L316,268 L320,276 L324,284 L328,276 L334,270 L340,268 L344,274
+            L342,282 L338,290 L342,298 L346,306 L344,314 L340,322 L334,328
+            L328,334 L320,338 L312,342 L304,344 L296,346 L288,344 L280,340
+            L272,334 L266,326 L260,318 L256,310 L252,300 L250,290 L248,280
+            L250,270 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Amager (Copenhagen area) -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M332,270 L338,268 L342,274 L344,284 L342,294 L338,300 L334,296 L332,286 L330,278 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK2: Lolland -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M222,372 L236,366 L252,364 L270,366 L288,370 L300,376 L296,384
+            L284,390 L268,394 L250,396 L234,392 L222,384 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Falster -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M306,362 L314,358 L320,364 L322,376 L320,388 L316,396 L310,400
+            L304,394 L302,382 L304,370 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- DK2: Møn -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M338,348 L346,344 L354,348 L356,356 L350,362 L342,360 L336,354 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1" stroke-linejoin="round"/>
+        <!-- DK2: Bornholm -->
+        <path class="dk-map-region dk2-region" onclick="setRegion('DK2')"
+            d="M440,258 L450,254 L460,258 L466,268 L464,280 L458,288 L448,292
+            L438,288 L434,278 L436,268 Z"
+            fill="#dc2626" stroke="#991b1b" stroke-width="1.2" stroke-linejoin="round"/>
+
+        <!-- DK1 Label -->
+        <text x="120" y="195" fill="white" font-size="20" font-weight="800" text-anchor="middle" style="pointer-events:none;text-shadow:0 2px 6px rgba(0,0,0,0.7);letter-spacing:2px">DK1</text>
+        <text x="120" y="212" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="500" text-anchor="middle" style="pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.5)">VESTDANMARK</text>
+        <!-- DK2 Label -->
+        <text x="296" y="302" fill="white" font-size="20" font-weight="800" text-anchor="middle" style="pointer-events:none;text-shadow:0 2px 6px rgba(0,0,0,0.7);letter-spacing:2px">DK2</text>
+        <text x="296" y="319" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="500" text-anchor="middle" style="pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.5)">ØSTDANMARK</text>
+        <!-- Bornholm label -->
+        <text x="450" y="276" fill="rgba(255,255,255,0.6)" font-size="8" text-anchor="middle" style="pointer-events:none">Bornholm</text>
+
+        <!-- Legend -->
+        <rect x="20" y="400" width="14" height="14" rx="3" fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.5"/>
+        <text x="40" y="412" font-size="11" style="fill:var(--text-secondary)">Vestdanmark (DK1) - Jylland &amp; Fyn</text>
+        <rect x="260" y="400" width="14" height="14" rx="3" fill="#dc2626" stroke="#991b1b" stroke-width="0.5"/>
+        <text x="280" y="412" font-size="11" style="fill:var(--text-secondary)">Østdanmark (DK2) - Sjælland &amp; øerne</text>
+    </svg>
 </div>
 
 <div class="currency-toggle">
@@ -499,7 +622,7 @@
 
     <div class="duration-selector" id="customDuration">
         <label>Varighed:</label>
-        <select id="durationSelect" onchange="onParamsChange()">
+        <select id="durationSelect" onchange="onManualParamsChange()">
             <option value="1">1 time</option>
             <option value="2" selected>2 timer</option>
             <option value="3">3 timer</option>
@@ -508,7 +631,8 @@
             <option value="6">6 timer</option>
         </select>
         <label>Forbrug (kWh):</label>
-        <input type="number" id="customKwh" min="0.1" step="0.1" value="14" style="width:80px" oninput="onParamsChange()">
+        <input type="number" id="customKwh" min="0.1" step="0.1" value="14" style="width:80px" oninput="onManualParamsChange()">
+        <span id="autoCalcBadge" style="font-size:0.7rem;color:#22c55e;margin-left:6px;opacity:1;transition:opacity 0.3s">&#x2713; auto</span>
     </div>
 
     <!-- INTERACTIVE TIMELINE -->
@@ -583,6 +707,15 @@ function setRegion(region) {
     currentRegion = region;
     document.querySelectorAll('.region-tab').forEach(function(tab) {
         tab.classList.toggle('active', tab.textContent.includes(region));
+    });
+    // Update map highlighting
+    document.querySelectorAll('.dk1-region').forEach(function(el) {
+        el.classList.toggle('map-active', region === 'DK1');
+        el.classList.toggle('map-dim', region !== 'DK1');
+    });
+    document.querySelectorAll('.dk2-region').forEach(function(el) {
+        el.classList.toggle('map-active', region === 'DK2');
+        el.classList.toggle('map-dim', region !== 'DK2');
     });
     fetchPrices();
 }
@@ -780,6 +913,8 @@ var simWorst = { start: 0, cost: 0 };
 var isDragging = false;
 var dragBound = false;
 
+var isAutoCalc = true;
+
 function selectAppliance(el) {
     document.querySelectorAll('.appliance-card').forEach(function(c) { c.classList.remove('selected'); });
     el.classList.add('selected');
@@ -792,6 +927,18 @@ function selectAppliance(el) {
 
     simKwh = kwh;
     simSlots = Math.max(1, Math.ceil(hours));
+    isAutoCalc = true;
+    var badge = document.getElementById('autoCalcBadge');
+    if (badge) { badge.style.opacity = '1'; badge.style.color = '#22c55e'; badge.innerHTML = '&#x2713; auto'; }
+    initSimulator();
+}
+
+function onManualParamsChange() {
+    simKwh = parseFloat(document.getElementById('customKwh').value) || 2;
+    simSlots = parseInt(document.getElementById('durationSelect').value) || 2;
+    isAutoCalc = false;
+    var badge = document.getElementById('autoCalcBadge');
+    if (badge) { badge.style.opacity = '1'; badge.style.color = '#f59e0b'; badge.innerHTML = '&#x270E; manual'; }
     initSimulator();
 }
 
@@ -960,11 +1107,14 @@ function updateSimReadout() {
 
     document.getElementById('simYourTime').textContent =
         String(simStartHour).padStart(2, '0') + ':00 - ' + String(endH).padStart(2, '0') + ':00';
-    document.getElementById('simYourCost').textContent = yourCost.toFixed(2) + ' ' + unit;
+    var feesPerKwh = 0.347; // total additional fees DKK/kWh
+    var yourTotal = (yourCost + feesPerKwh * simKwh) * 1.25;
+    var optTotal = (optCost + feesPerKwh * simKwh) * 1.25;
+    document.getElementById('simYourCost').textContent = yourTotal.toFixed(2) + ' DKK';
 
     document.getElementById('simOptTime').textContent =
         String(simOptimal.start).padStart(2, '0') + ':00 - ' + String(optEndH).padStart(2, '0') + ':00';
-    document.getElementById('simOptCost').textContent = optCost.toFixed(2) + ' ' + unit;
+    document.getElementById('simOptCost').textContent = optTotal.toFixed(2) + ' DKK';
 
     // Update tooltip
     var appName = selectedAppliance ? selectedAppliance.querySelector('.appliance-name').textContent : 'Apparat';
@@ -974,11 +1124,12 @@ function updateSimReadout() {
         String(simStartHour).padStart(2, '0') + ':00 - ' + String(endH).padStart(2, '0') + ':00';
     document.getElementById('simTooltipKwh').textContent = simKwh.toFixed(1) + ' kWh';
     document.getElementById('simTooltipPriceKwh').textContent = avgPriceKwh.toFixed(3) + ' ' + unit + '/kWh';
-    document.getElementById('simTooltipCost').textContent = yourCost.toFixed(2) + ' ' + unit;
-    if (diff < 0.01) {
+    document.getElementById('simTooltipCost').textContent = yourTotal.toFixed(2) + ' DKK (inkl. afgifter)';
+    var totalDiff = yourTotal - optTotal;
+    if (totalDiff < 0.01) {
         document.getElementById('simTooltipVsOpt').innerHTML = '<span class="sav-green">' + t('thisIsOptTime') + '</span>';
     } else {
-        document.getElementById('simTooltipVsOpt').innerHTML = '<span class="sav-red">+' + diff.toFixed(2) + ' ' + unit + '</span>';
+        document.getElementById('simTooltipVsOpt').innerHTML = '<span class="sav-red">+' + totalDiff.toFixed(2) + ' DKK</span>';
     }
 
     // Diff bar
@@ -1086,14 +1237,115 @@ function updateSimTable(yourCost, optCost, diff) {
             '</td></tr>';
     }
 
+    // ===== TOTAL COST WITH FEES =====
+    // Danish electricity additional costs (DKK/kWh, 2025 rates)
+    var elafgift = 0.008;       // Elafgift (electricity tax)
+    var systemtarif = 0.054;    // Systemtarif (Energinet)
+    var transmissionstarif = 0.049; // Transmissionsnettarif
+    var nettarif = 0.236;       // Nettarif / distribution (avg)
+    var totalFees = elafgift + systemtarif + transmissionstarif + nettarif; // ~0.347 DKK/kWh
+    var vatRate = 0.25;
+
+    var feesCostYour = totalFees * simKwh;
+    var feesCostOpt = totalFees * simKwh;
+    var spotYourNoFees = yourCost;
+    var spotOptNoFees = optCost;
+    var totalYourPreVat = spotYourNoFees + feesCostYour;
+    var totalOptPreVat = spotOptNoFees + feesCostOpt;
+    var vatYour = totalYourPreVat * vatRate;
+    var vatOpt = totalOptPreVat * vatRate;
+    var grandYour = totalYourPreVat + vatYour;
+    var grandOpt = totalOptPreVat + vatOpt;
+    var grandDiff = grandYour - grandOpt;
+    var gdClass = grandDiff > 0.01 ? 'diff-positive' : grandDiff < -0.01 ? 'diff-negative' : 'diff-zero';
+    var gdSign = grandDiff > 0 ? '+' : '';
+
+    var feeLabel = currentLang === 'ba' ? 'Ukupni trošak sa svim naknadama' : 'Samlet pris inkl. afgifter og moms';
+    var spotLabel = currentLang === 'ba' ? 'Spot cijena (energija)' : 'Spotpris (energi)';
+    var elafLabel = currentLang === 'ba' ? 'Porez na struju' : 'Elafgift';
+    var sysLabel = currentLang === 'ba' ? 'Sistemska tarifa' : 'Systemtarif';
+    var transLabel = currentLang === 'ba' ? 'Transmisija' : 'Transmissionstarif';
+    var netLabel = currentLang === 'ba' ? 'Mrežna tarifa (distribucija)' : 'Nettarif (distribution)';
+    var vatLabel = currentLang === 'ba' ? 'PDV (25%)' : 'Moms (25%)';
+    var totalLabel = currentLang === 'ba' ? 'UKUPNO ZA PLAĆANJE' : 'TOTAL AT BETALE';
+    var feesNote = currentLang === 'ba' ? 'Naknade su prosječne za 2025. Mrežna tarifa varira po distributeru.' : 'Afgifter er gennemsnitlige for 2025. Nettarif varierer efter netselskab.';
+
+    html += '<tr style="background:rgba(168,85,247,0.08)"><td colspan="4" style="text-align:center;color:#a78bfa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;padding:10px;font-weight:700">' + feeLabel + '</td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">⚡ ' + spotLabel + '</td>' +
+        '<td class="sav-blue" style="font-size:0.85rem">' + spotYourNoFees.toFixed(2) + ' DKK</td>' +
+        '<td class="sav-green" style="font-size:0.85rem">' + spotOptNoFees.toFixed(2) + ' DKK</td>' +
+        '<td style="font-size:0.8rem;color:#64748b">' + (spotYourNoFees/simKwh).toFixed(3) + ' DKK/kWh</td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">📋 ' + elafLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (elafgift * simKwh).toFixed(2) + ' DKK (' + elafgift.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🔌 ' + sysLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (systemtarif * simKwh).toFixed(2) + ' DKK (' + systemtarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🏗️ ' + transLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (transmissionstarif * simKwh).toFixed(2) + ' DKK (' + transmissionstarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr><td style="color:#94a3b8;font-size:0.8rem">🔧 ' + netLabel + '</td>' +
+        '<td colspan="2" style="font-size:0.8rem;color:var(--text-secondary)">' + (nettarif * simKwh).toFixed(2) + ' DKK (' + nettarif.toFixed(3) + '/kWh)</td>' +
+        '<td></td></tr>';
+    html += '<tr style="border-top:1px solid var(--border-color)"><td style="color:#94a3b8;font-size:0.8rem">🏛️ ' + vatLabel + '</td>' +
+        '<td style="font-size:0.8rem;color:var(--text-secondary)">' + vatYour.toFixed(2) + ' DKK</td>' +
+        '<td style="font-size:0.8rem;color:var(--text-secondary)">' + vatOpt.toFixed(2) + ' DKK</td>' +
+        '<td></td></tr>';
+    html += '<tr style="background:rgba(168,85,247,0.12);border-top:2px solid #a78bfa">' +
+        '<td style="font-weight:700;color:#a78bfa;font-size:0.9rem">💰 ' + totalLabel + '</td>' +
+        '<td class="sav-blue" style="font-weight:700;font-size:1rem">' + grandYour.toFixed(2) + ' DKK</td>' +
+        '<td class="sav-green" style="font-weight:700;font-size:1rem">' + grandOpt.toFixed(2) + ' DKK</td>' +
+        '<td class="' + gdClass + '" style="font-weight:700">' + gdSign + grandDiff.toFixed(2) + ' DKK</td></tr>';
+    html += '<tr><td colspan="4" style="text-align:center;color:#64748b;font-size:0.7rem;font-style:italic;padding:8px">ℹ️ ' + feesNote + '</td></tr>';
+
     tbody.innerHTML = html;
 }
 
 // Initial load
 fetchPrices();
+// Set initial map state (DK1 active)
+document.querySelectorAll('.dk2-region').forEach(function(el) { el.classList.add('map-dim'); });
+document.querySelectorAll('.dk1-region').forEach(function(el) { el.classList.add('map-active'); });
 
 // Auto-refresh every 5 minutes
 setInterval(fetchPrices, 5 * 60 * 1000);
+
+// ==========================================
+// GEOLOCATION: Auto-detect DK1 or DK2
+// ==========================================
+(function() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+        // Great Belt boundary ~10.9°E separates DK1 (west) and DK2 (east)
+        // Also check if user is roughly within Denmark bounds (54-58°N, 7-16°E)
+        if (lat >= 54 && lat <= 58 && lng >= 7 && lng <= 16) {
+            var detectedRegion = lng < 10.9 ? 'DK1' : 'DK2';
+            if (detectedRegion !== currentRegion) {
+                setRegion(detectedRegion);
+            }
+            // Show location pin on map
+            var mapSvg = document.getElementById('dkMapSvg');
+            if (mapSvg) {
+                // Map coordinate transform: lng 7-16 → x 50-420, lat 54-58 → y 360-5
+                var mapX = 50 + (lng - 7) * (370 / 9);
+                var mapY = 360 - (lat - 54) * (355 / 4);
+                var pin = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                pin.innerHTML = '<circle cx="' + mapX + '" cy="' + mapY + '" r="6" fill="#fbbf24" stroke="#fff" stroke-width="2" opacity="0.95"/>' +
+                    '<circle cx="' + mapX + '" cy="' + mapY + '" r="10" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.6">' +
+                    '<animate attributeName="r" from="6" to="16" dur="1.5s" repeatCount="indefinite"/>' +
+                    '<animate attributeName="opacity" from="0.6" to="0" dur="1.5s" repeatCount="indefinite"/>' +
+                    '</circle>' +
+                    '<text x="' + (mapX + 14) + '" y="' + (mapY + 4) + '" font-size="10" fill="#fbbf24" font-weight="bold">📍 ' + (currentLang === 'ba' ? 'Vi ste ovdje' : 'Du er her') + '</text>';
+                mapSvg.appendChild(pin);
+            }
+        }
+    }, function(err) {
+        // Geolocation denied or failed — just use default DK1
+        console.log('Geolocation not available:', err.message);
+    }, { timeout: 8000, maximumAge: 300000 });
+})();
 
 // ==========================================
 // VISIT STATISTICS + ADMIN PANEL
@@ -1507,6 +1759,13 @@ function applyLanguage() {
     var tabs = document.querySelectorAll('.region-tab');
     if (tabs[0]) tabs[0].textContent = L.dk1;
     if (tabs[1]) tabs[1].textContent = L.dk2;
+    // Map legend labels (update if map exists)
+    var mapSvg = document.getElementById('dkMapSvg');
+    if (mapSvg) {
+        var legends = mapSvg.querySelectorAll('text[font-size="13"]');
+        if (legends[0]) legends[0].textContent = L.dk1.replace('DK1 - ','') + ' (DK1)';
+        if (legends[1]) legends[1].textContent = L.dk2.replace('DK2 - ','') + ' (DK2)';
+    }
 
     // Card labels
     var labels = document.querySelectorAll('.card-label');
